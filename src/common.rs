@@ -5,6 +5,14 @@ pub(crate) fn read_bool_from<T: From<u8> + PartialEq>(x: T) -> bool {
     x == T::from(1u8)
 }
 
+pub(crate) fn write_bool_as<T: From<u8>>(x: &bool) -> T {
+    if *x {
+        T::from(1u8)
+    } else {
+        T::from(0u8)
+    }
+}
+
 #[binrw::parser(reader, endian)]
 pub(crate) fn read_string_with_length() -> BinResult<String> {
     let length = u32::read_le(reader)? as usize;
