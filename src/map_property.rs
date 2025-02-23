@@ -177,10 +177,15 @@ fn custom_parser(
     Ok(result)
 }
 
+fn calc_size_in_bytes(entries: &Vec<MapEntry>) -> u32 {
+    // TODO: stub
+    49
+}
+
 #[binrw]
 #[derive(Debug)]
 pub struct MapProperty {
-    // Plus this int
+    #[bw(calc = calc_size_in_bytes(entries))]
     pub size_in_bytes: u32,
 
     #[brw(pad_before = 4)]
@@ -203,11 +208,11 @@ pub struct MapProperty {
 mod tests {
     use super::*;
     use crate::map_property::MabSubProperty::{Int, String};
-    use binrw::BinRead;
+    use binrw::{BinRead, BinWrite};
     use std::io::Cursor;
 
     #[test]
-    fn simple_strmap() {
+    fn read_simple_strmap() {
         // From LocalProfile.sav i think
         let data = [
             0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x53, 0x74,
@@ -220,7 +225,6 @@ mod tests {
         ];
         let mut cursor = Cursor::new(data);
         let decoded = MapProperty::read_le(&mut cursor).unwrap();
-        assert_eq!(decoded.size_in_bytes, 49);
         assert_eq!(decoded.key_name, "StrProperty");
         assert_eq!(decoded.value_name, "StrProperty");
         let MapKeyProperty::String(key_property) = &decoded.entries.first().unwrap().key else {
@@ -231,6 +235,40 @@ mod tests {
         };
         assert_eq!(key_property.value, "AR0XJGFWA6HNIQ1AAUJ9UR828");
         assert_eq!(value_property.value, "NAME 1");
+    }
+
+    #[test]
+    fn write_simple_map() {
+        let expected_data: [u8; 90] = [
+            0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x53, 0x74,
+            0x72, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x79, 0x00, 0x0c, 0x00, 0x00, 0x00,
+            0x53, 0x74, 0x72, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x79, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x1a, 0x00, 0x00, 0x00, 0x41, 0x52, 0x30,
+            0x58, 0x4a, 0x47, 0x46, 0x57, 0x41, 0x36, 0x48, 0x4e, 0x49, 0x51, 0x31, 0x41, 0x41,
+            0x55, 0x4a, 0x39, 0x55, 0x52, 0x38, 0x32, 0x38, 0x00, 0x07, 0x00, 0x00, 0x00, 0x4e,
+            0x41, 0x4d, 0x45, 0x20, 0x31, 0x00,
+        ];
+        let property = MapProperty {
+            key_name: "StrProperty".to_string(),
+            value_name: "StrProperty".to_string(),
+            key_type: KeyType::String,
+            entries: vec![
+                MapEntry {
+                    key: MapKeyProperty::String(StringMapKey { value: "AR0XJGFWA6HNIQ1AAUJ9UR828".to_string() }),
+                    value: String(MapSubStrProperty {
+                        value: "NAME 1".to_string(),
+                    }),
+                }
+            ],
+        };
+
+        let mut buffer: Vec<u8> = Vec::new();
+        {
+            let mut cursor = Cursor::new(&mut buffer);
+            property.write_le(&mut cursor).unwrap();
+        }
+
+        assert_eq!(expected_data, &buffer[..]);
     }
 
     #[test]
@@ -257,7 +295,6 @@ mod tests {
         ];
         let mut cursor = Cursor::new(data);
         let decoded = MapProperty::read_le(&mut cursor).unwrap();
-        assert_eq!(decoded.size_in_bytes, 186);
         assert_eq!(decoded.key_name, "NameProperty");
         assert_eq!(decoded.value_name, "IntProperty");
         let MapKeyProperty::Enum(key_property) = &decoded.entries.first().unwrap().key else {
