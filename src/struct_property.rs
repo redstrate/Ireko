@@ -1,4 +1,9 @@
-use crate::structs::{CarryCountProperty, DAAssembleIdDataStruct, DABuildDataStruct, DACharacterCommonStatusStruct, DALoadOptionStruct, DAMachineColoringDataStruct, DAModuleColorStruct, DAModuleItemDataStruct, DateTimeStruct, GuidStruct, LinearColorStruct, ParamsStruct, PrimaryAssetIdStruct, PrimaryAssetNameProperty, SaveSlotInfoStruct};
+use crate::structs::{
+    CarryCountProperty, DAAssembleIdDataStruct, DABuildDataStruct, DACharacterCommonStatusStruct,
+    DALoadOptionStruct, DAMachineColoringDataStruct, DAModuleColorStruct, DAModuleItemDataStruct,
+    DateTimeStruct, GuidStruct, LinearColorStruct, ParamsStruct, PrimaryAssetIdStruct,
+    PrimaryAssetNameProperty, SaveSlotInfoStruct,
+};
 use binrw::binrw;
 
 #[binrw]
@@ -17,11 +22,9 @@ pub enum Struct {
     #[br(magic = b"PrimaryAssetType\0")]
     PrimaryAssetType {
         #[br(pad_before = 17)]
-
         name: PrimaryAssetNameProperty,
         #[br(pad_before = 9)] // "None" and it's length in bytes plus the null terminator
         #[br(pad_after = 9)] // ditto
-
         primary_asset_name: PrimaryAssetNameProperty,
     },
     #[br(magic = b"PrimaryAssetId\0")]
@@ -42,7 +45,6 @@ pub enum Struct {
     LinearColor(LinearColorStruct),
     #[br(magic = b"CarryCount\0")]
     CarryCount {
-
         carry_count: CarryCountProperty,
 
         #[br(pad_before = 15)] // "StoreCount" + 4 bytes for length + 1 byte for endofstring
@@ -51,7 +53,6 @@ pub enum Struct {
     },
     #[br(magic = b"Map\0")]
     Map {
-
         #[br(pad_after = 9)] // "None" + 1 byte for endofstring + 4 bytes for length
         map: CarryCountProperty,
     },
@@ -63,23 +64,18 @@ pub enum Struct {
         #[br(pad_after = 9)] // "None" and it's length in bytes plus the null terminator
         name: PrimaryAssetNameProperty,
 
-
         #[br(pad_after = 9)] // "None" and it's length in bytes plus the null terminator
         primary_asset_name: PrimaryAssetNameProperty,
-
 
         data: [u8; 137],
     },
     #[br(magic = b"Set\0")]
     Set {
-
         #[br(pad_after = 9)] // "None" + 1 byte for endofstring + 4 bytes for length
         set: CarryCountProperty,
     },
     #[br(magic = b"ItemSlots\0")]
-    ItemSlots {
-        unk: [u8; 2125]
-    },
+    ItemSlots { unk: [u8; 2125] },
 }
 
 #[binrw]

@@ -1,4 +1,4 @@
-use crate::read_bool_from;
+use crate::common::read_bool_from;
 use binrw::binrw;
 
 #[binrw]

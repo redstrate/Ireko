@@ -1,5 +1,6 @@
-use crate::map_property::{MabSubProperty};
-use binrw::{binrw, BinRead, BinResult};
+use crate::common::read_string_with_length;
+use crate::map_property::MabSubProperty;
+use binrw::{BinRead, BinResult, binrw};
 
 #[binrw::parser(reader, endian)]
 fn custom_parser(size_in_bytes: u32, value_type: &str) -> BinResult<Vec<ArrayEntry>> {
@@ -15,13 +16,11 @@ fn custom_parser(size_in_bytes: u32, value_type: &str) -> BinResult<Vec<ArrayEnt
     Ok(result)
 }
 
-
 #[binrw]
 #[derive(Debug)]
 #[br(import(value_type: &str))]
 pub struct ArrayEntry {
     #[br(args { magic: &value_type })]
-
     pub key: MabSubProperty,
 }
 
@@ -29,17 +28,10 @@ pub struct ArrayEntry {
 #[derive(Debug)]
 pub struct ArrayProperty {
     // Plus this int
-
     pub size_in_bytes: u32,
 
-    #[br(temp)]
+    #[br(pad_before = 4, parse_with = read_string_with_length)]
     #[bw(ignore)]
-    #[br(pad_before = 4)]
-    pub key_name_length: u32,
-    #[br(count = key_name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-
     pub key_name: String,
 
     #[br(pad_before = 1)]
@@ -60,20 +52,9 @@ mod tests {
     fn simple_array() {
         // From Slot.sav
         let data = [
-            0x12, 0x00, 0x00,
-            0x00, 0x00, 0x00,
-            0x00, 0x00, 0x0c,
-            0x00, 0x00, 0x00,
-            0x53, 0x74, 0x72,
-            0x50, 0x72, 0x6f,
-            0x70, 0x65, 0x72,
-            0x74, 0x79, 0x00,
-            0x00, 0x01, 0x00,
-            0x00, 0x00, 0x0a,
-            0x00, 0x00, 0x00,
-            0x72, 0x65, 0x64,
-            0x73, 0x74, 0x72,
-            0x61, 0x74, 0x65,
+            0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x53, 0x74,
+            0x72, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x79, 0x00, 0x00, 0x01, 0x00, 0x00,
+            0x00, 0x0a, 0x00, 0x00, 0x00, 0x72, 0x65, 0x64, 0x73, 0x74, 0x72, 0x61, 0x74, 0x65,
             0x00,
         ];
         let mut cursor = Cursor::new(data);
@@ -83,6 +64,6 @@ mod tests {
         let String(value_property) = &decoded.entries.first().unwrap().key else {
             panic!("StrProperty!")
         };
-        assert_eq!(value_property.name, "redstrate");
+        assert_eq!(value_property.value, "redstrate");
     }
 }

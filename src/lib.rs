@@ -1,5 +1,6 @@
 pub mod array_property;
 pub mod bool_property;
+mod common;
 pub mod float_property;
 pub mod int_property;
 pub mod map_property;
@@ -21,10 +22,6 @@ use crate::set_property::SetProperty;
 use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
 use binrw::binrw;
-
-pub(crate) fn read_bool_from<T: From<u8> + PartialEq>(x: T) -> bool {
-    x == T::from(1u8)
-}
 
 #[binrw]
 #[derive(Debug)]
@@ -77,7 +74,6 @@ pub enum StringBasedProperty {
 pub struct Entry {
     #[br(temp)]
     #[bw(ignore)]
-
     pub name_length: u32,
     #[br(count = name_length)]
     #[bw(map = |x : &String | x.as_bytes())]

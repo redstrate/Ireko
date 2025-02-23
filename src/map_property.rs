@@ -1,8 +1,8 @@
-use crate::read_bool_from;
+use crate::common::{read_bool_from, read_string_with_length};
 use crate::struct_property::Struct;
 use crate::structs::PrimaryAssetNameProperty;
 use binrw::helpers::until_exclusive;
-use binrw::{binrw, BinRead, BinResult};
+use binrw::{BinRead, BinResult, binrw};
 
 // A struct without a name
 #[binrw]
@@ -24,23 +24,13 @@ pub struct MapSubStructProperty {
 #[binrw]
 #[derive(Debug)]
 pub struct StructMaybeKey {
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub unk_name_length: u32,
-    #[br(count = unk_name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub unk_name: String,
 
-    #[br(temp)]
+    #[br(pad_after = 8, parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub unk_type_length: u32,
-    #[br(count = unk_type_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-    #[br(pad_after = 8)] // nothingness and then length for the struct
     pub unk_type: String,
-
 
     #[br(pad_before = 4)] // type length
     pub r#struct: Struct,
@@ -55,25 +45,17 @@ pub struct MapSubFloatProperty {
 #[binrw]
 #[derive(Debug)]
 pub struct MapSubNameProperty {
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub sub_property_name_length: u32,
-    #[br(count = sub_property_name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-    pub sub_property_name: String,
+    pub value: String,
 }
 
 #[binrw]
 #[derive(Debug)]
 pub struct MapSubStrProperty {
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub name_length: u32,
-    #[br(count = name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-    pub name: String,
+    pub value: String,
 }
 
 #[binrw]
@@ -93,11 +75,9 @@ pub struct MapSubIntProperty {
 #[binrw]
 #[derive(Debug)]
 pub struct MapSubEnumProperty {
-    pub enum_length: u32,
-    #[br(count = enum_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-    pub r#enum: String,
+    #[br(parse_with = read_string_with_length)]
+    #[bw(ignore)]
+    pub value: String,
 }
 
 #[binrw]
@@ -148,11 +128,9 @@ pub struct SomeID2Struct {
 #[binrw]
 #[derive(Debug)]
 pub struct StringMapKey {
-    pub enum_length: u32,
-    #[br(count = enum_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-    pub r#enum: String,
+    #[br(parse_with = read_string_with_length)]
+    #[bw(ignore)]
+    pub value: String,
 }
 
 #[binrw]
@@ -180,18 +158,15 @@ pub enum MapKeyProperty {
 #[br(import(key_type: &KeyType, value_type: &str))]
 pub struct MapEntry {
     #[br(args { magic: key_type})]
-
     pub key: MapKeyProperty,
 
     #[br(args { magic: value_type })]
-
     pub value: MabSubProperty,
 }
 
 #[binrw]
 #[brw(repr = u32)]
-#[derive(Debug)]
-#[derive(PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum KeyType {
     String = 0x1,
     GUID = 0x3,
@@ -203,7 +178,11 @@ pub enum KeyType {
 }
 
 #[binrw::parser(reader, endian)]
-fn custom_parser(size_in_bytes: u32, key_type: &KeyType, value_type: &str) -> BinResult<Vec<MapEntry>> {
+fn custom_parser(
+    size_in_bytes: u32,
+    key_type: &KeyType,
+    value_type: &str,
+) -> BinResult<Vec<MapEntry>> {
     let mut result = Vec::<MapEntry>::new();
 
     let mut current = reader.stream_position().unwrap();
@@ -220,28 +199,17 @@ fn custom_parser(size_in_bytes: u32, key_type: &KeyType, value_type: &str) -> Bi
 #[derive(Debug)]
 pub struct MapProperty {
     // Plus this int
-
     pub size_in_bytes: u32,
 
-    #[br(temp)]
+    #[br(pad_before = 4, parse_with = read_string_with_length)]
     #[bw(ignore)]
-    #[br(pad_before = 4)]
-    pub key_name_length: u32,
-    #[br(count = key_name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub key_name: String,
 
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub value_name_length: u32,
-    #[br(count = value_name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub value_name: String,
 
     #[br(pad_before = 5)]
-
     pub key_type: KeyType,
 
     #[br(parse_with = custom_parser, args(size_in_bytes, &key_type, &value_name))]
@@ -278,8 +246,8 @@ mod tests {
         let String(value_property) = &decoded.entries.first().unwrap().value else {
             panic!("StrProperty!")
         };
-        assert_eq!(key_property.r#enum, "AR0XJGFWA6HNIQ1AAUJ9UR828");
-        assert_eq!(value_property.name, "NAME 1");
+        assert_eq!(key_property.value, "AR0XJGFWA6HNIQ1AAUJ9UR828");
+        assert_eq!(value_property.value, "NAME 1");
     }
 
     #[test]
@@ -315,7 +283,7 @@ mod tests {
         let Int(value_property) = &decoded.entries.first().unwrap().value else {
             panic!("Int!")
         };
-        assert_eq!(key_property.r#enum, "SelectedMachine");
+        assert_eq!(key_property.value, "SelectedMachine");
         assert_eq!(value_property.value, 2);
         // TODO: test the rest of the values
     }

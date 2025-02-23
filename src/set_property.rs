@@ -1,27 +1,19 @@
 use crate::StringBasedProperty;
+use crate::common::read_string_with_length;
 use binrw::binrw;
 
 #[binrw]
 #[derive(Debug)]
 pub struct SetEntry {
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub unk_name_length: u32,
-    #[br(count = unk_name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub unk_name: String,
 
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub unk_type_length: u32,
-    #[br(count = unk_type_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub unk_type: String,
 
     #[br(args { magic: &unk_type })]
-
     pub key: StringBasedProperty,
 }
 
@@ -29,13 +21,9 @@ pub struct SetEntry {
 #[derive(Debug)]
 pub struct SetProperty {
     pub unk: u32,
-    #[br(temp)]
+
+    #[br(pad_before = 4, parse_with = read_string_with_length)]
     #[bw(ignore)]
-    #[br(pad_before = 4)]
-    pub key_name_length: u32,
-    #[br(count = key_name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub key_name: String,
 
     #[br(pad_before = 5)]

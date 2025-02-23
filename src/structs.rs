@@ -38,24 +38,20 @@ pub struct ParamsStruct {
 pub struct PrimaryAssetNameProperty {
     #[br(temp)]
     #[bw(ignore)]
-
     pub property_name_length: u32,
     #[br(count = property_name_length)]
     #[bw(map = |x : &String | x.as_bytes())]
     #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-
     pub property_name: String,
 
     #[br(temp)]
     #[bw(ignore)]
     #[br(if(property_name != "None"))]
-
     pub type_length: u32,
     #[br(count = type_length)]
     #[bw(map = |x : &String | x.as_bytes())]
     #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     #[br(if(property_name != "None"))]
-
     pub type_name: String,
 
     #[br(if(property_name != "None"))]
@@ -64,18 +60,15 @@ pub struct PrimaryAssetNameProperty {
     pub key: Option<Box<StringBasedProperty>>,
 }
 
-
 #[binrw]
 #[derive(Debug)]
 pub struct CarryCountProperty {
     #[br(temp)]
     #[bw(ignore)]
-
     pub property_name_length: u32,
     #[br(count = property_name_length)]
     #[bw(map = |x : &String | x.as_bytes())]
     #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-
     pub property_name: String,
 
     #[br(args { magic: &property_name})]
@@ -94,7 +87,7 @@ pub struct PrimaryAssetIdStruct {
 #[derive(Debug)]
 pub struct DAModuleItemDataStruct {
     #[br(pad_before = 17)]
-    pub module_level: PrimaryAssetNameProperty
+    pub module_level: PrimaryAssetNameProperty,
 }
 
 #[binrw]

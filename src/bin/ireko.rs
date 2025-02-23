@@ -1,6 +1,6 @@
 use binrw::BinRead;
-use flate2::bufread::ZlibDecoder;
 use flate2::Decompress;
+use flate2::bufread::ZlibDecoder;
 use ireko::{CompressedSaveFile, TaggedSerialization};
 use std::env;
 use std::io::{Cursor, Read};
