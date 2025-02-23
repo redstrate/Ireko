@@ -14,7 +14,7 @@ use binrw::helpers::{until, until_eof};
 
 use crate::array_property::ArrayProperty;
 use crate::bool_property::BoolProperty;
-use crate::common::read_string_with_length;
+use crate::common::{read_string_with_length, write_string_with_length};
 use crate::float_property::FloatProperty;
 use crate::int_property::IntProperty;
 use crate::map_property::MapProperty;
@@ -52,12 +52,12 @@ pub enum Property {
 #[derive(Debug)]
 pub struct Entry {
     #[br(parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[bw(write_with = write_string_with_length)]
     pub name: String,
 
     #[br(parse_with = read_string_with_length)]
-    #[bw(ignore)]
-    #[br(temp, if(name != "None"))]
+    #[bw(write_with = write_string_with_length)]
+    #[br(if(name != "None"))]
     pub type_name: String,
 
     #[br(if(name != "None"), args { magic: &type_name })]
@@ -70,6 +70,14 @@ pub struct TaggedObject {
     pub size_in_bytes: u32,
     #[br(parse_with = until(|entry: &Entry| entry.name == "None"))]
     pub entries: Vec<Entry>,
+}
+
+impl TaggedObject {
+    pub fn entry(&self, key: &str) -> Option<&Entry> {
+        let entries: Vec<&Entry> = self.entries.iter().filter(|e| e.name == key).collect();
+
+        entries.first().copied()
+    }
 }
 
 #[binrw]
