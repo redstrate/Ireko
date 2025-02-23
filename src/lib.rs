@@ -4,7 +4,6 @@ mod common;
 pub mod float_property;
 pub mod int_property;
 pub mod map_property;
-pub mod name_property;
 pub mod set_property;
 pub mod str_property;
 pub mod struct_property;
@@ -17,7 +16,6 @@ use crate::bool_property::BoolProperty;
 use crate::float_property::FloatProperty;
 use crate::int_property::IntProperty;
 use crate::map_property::MapProperty;
-use crate::name_property::NameProperty;
 use crate::set_property::SetProperty;
 use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
@@ -37,7 +35,7 @@ pub enum Property {
     #[br(magic = b"StrProperty\0")]
     String(StrProperty),
     #[br(magic = b"NameProperty\0")]
-    Name(NameProperty),
+    Name(StrProperty),
     #[br(magic = b"ArrayProperty\0")]
     Array(ArrayProperty),
     #[br(magic = b"MapProperty\0")]
@@ -52,7 +50,7 @@ pub enum Property {
 #[br(import { magic: &str })]
 pub enum StringBasedProperty {
     #[br(pre_assert("NameProperty" == magic))]
-    Name(NameProperty),
+    Name(StrProperty),
     #[br(pre_assert("StructProperty" == magic))]
     Struct(StructProperty),
     #[br(pre_assert("FloatProperty" == magic))]
