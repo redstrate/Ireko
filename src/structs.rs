@@ -38,35 +38,49 @@ pub struct ParamsStruct {
 pub struct PrimaryAssetNameProperty {
     #[br(temp)]
     #[bw(ignore)]
+    #[br(dbg)]
     pub property_name_length: u32,
     #[br(count = property_name_length)]
     #[bw(map = |x : &String | x.as_bytes())]
     #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
+    #[br(dbg)]
     pub property_name: String,
 
     #[br(temp)]
     #[bw(ignore)]
     #[br(if(property_name != "None"))]
+    #[br(dbg)]
     pub type_length: u32,
     #[br(count = type_length)]
     #[bw(map = |x : &String | x.as_bytes())]
     #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     #[br(if(property_name != "None"))]
+    #[br(dbg)]
     pub type_name: String,
 
     #[br(if(property_name != "None"))]
     #[br(args { magic: &type_name})]
+    //#[br(dbg)]
     pub key: Option<Box<StringBasedProperty>>,
 }
 
+
 #[binrw]
 #[derive(Debug)]
-pub struct PrimaryAssetTypeStruct {
-    #[br(pad_before = 17)]
-    name: PrimaryAssetNameProperty,
-    #[br(pad_before = 9)] // "None" and it's length in bytes plus the null terminator
-    #[br(pad_after = 9)] // ditto
-    primary_asset_name: PrimaryAssetNameProperty,
+pub struct CarryCountProperty {
+    #[br(temp)]
+    #[bw(ignore)]
+    #[br(dbg)]
+    pub property_name_length: u32,
+    #[br(count = property_name_length)]
+    #[bw(map = |x : &String | x.as_bytes())]
+    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
+    #[br(dbg)]
+    pub property_name: String,
+
+    #[br(args { magic: &property_name})]
+    //#[br(dbg)]
+    pub key: Option<Box<StringBasedProperty>>,
 }
 
 #[binrw]
@@ -79,7 +93,8 @@ pub struct PrimaryAssetIdStruct {
 #[binrw]
 #[derive(Debug)]
 pub struct DAModuleItemDataStruct {
-    pub unk: [u8; 17],
+    #[br(pad_before = 17)]
+    pub module_level: PrimaryAssetNameProperty
 }
 
 #[binrw]

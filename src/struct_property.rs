@@ -1,13 +1,9 @@
-use crate::structs::{
-    DAAssembleIdDataStruct, DABuildDataStruct, DACharacterCommonStatusStruct, DALoadOptionStruct,
-    DAMachineColoringDataStruct, DAModuleColorStruct, DAModuleItemDataStruct, DateTimeStruct,
-    GuidStruct, LinearColorStruct, ParamsStruct, PrimaryAssetIdStruct, PrimaryAssetTypeStruct,
-    SaveSlotInfoStruct,
-};
+use crate::structs::{CarryCountProperty, DAAssembleIdDataStruct, DABuildDataStruct, DACharacterCommonStatusStruct, DALoadOptionStruct, DAMachineColoringDataStruct, DAModuleColorStruct, DAModuleItemDataStruct, DateTimeStruct, GuidStruct, LinearColorStruct, ParamsStruct, PrimaryAssetIdStruct, PrimaryAssetNameProperty, SaveSlotInfoStruct};
 use binrw::binrw;
 
 #[binrw]
 #[derive(Debug)]
+#[br(import { is_map: bool })]
 pub enum Struct {
     #[br(magic = b"DateTime\0")]
     DateTime(DateTimeStruct),
@@ -20,7 +16,15 @@ pub enum Struct {
     #[br(magic = b"Params\0")]
     Params(ParamsStruct),
     #[br(magic = b"PrimaryAssetType\0")]
-    PrimaryAssetType(PrimaryAssetTypeStruct),
+    PrimaryAssetType {
+        #[br(pad_before = 17)]
+        #[br(dbg)]
+        name: PrimaryAssetNameProperty,
+        #[br(pad_before = 9)] // "None" and it's length in bytes plus the null terminator
+        #[br(pad_after = 9)] // ditto
+        #[br(dbg)]
+        primary_asset_name: PrimaryAssetNameProperty,
+    },
     #[br(magic = b"PrimaryAssetId\0")]
     PrimaryAssetId(PrimaryAssetIdStruct),
     #[br(magic = b"DAModuleItemData\0")]
@@ -37,6 +41,42 @@ pub enum Struct {
     DAModuleColor(DAModuleColorStruct),
     #[br(magic = b"LinearColor\0")]
     LinearColor(LinearColorStruct),
+    #[br(magic = b"CarryCount\0")]
+    CarryCount {
+        #[br(dbg)]
+        carry_count: CarryCountProperty,
+        #[br(dbg)]
+        #[br(pad_before = 15)] // "StoreCount" + 4 bytes for length + 1 byte for endofstring
+        #[br(pad_after = 9)] // "None" + 1 byte for endofstring + 4 bytes for length
+        store_count: CarryCountProperty,
+    },
+    #[br(magic = b"Map\0")]
+    Map {
+        #[br(dbg)]
+        #[br(pad_after = 9)] // "None" + 1 byte for endofstring + 4 bytes for length
+        map: CarryCountProperty,
+    },
+    // TODO: im almost certain this isn't a struct name
+    #[br(magic = b"ID\0")]
+    ID {
+        unk: [u8; 149], // not sure how to parse this yet
+        #[br(dbg)]
+        #[br(pad_after = 9)] // "None" and it's length in bytes plus the null terminator
+        name: PrimaryAssetNameProperty,
+
+        #[br(dbg)]
+        #[br(pad_after = 9)] // "None" and it's length in bytes plus the null terminator
+        primary_asset_name: PrimaryAssetNameProperty,
+
+        #[br(dbg)]
+        data: [u8; 137],
+    },
+    #[br(magic = b"Set\0")]
+    Set {
+        #[br(dbg)]
+        #[br(pad_after = 9)] // "None" + 1 byte for endofstring + 4 bytes for length
+        set: CarryCountProperty,
+    },
 }
 
 #[binrw]
@@ -47,5 +87,6 @@ pub struct StructProperty {
     #[bw(ignore)]
     #[br(pad_before = 4)]
     pub name_length: u32,
+    #[br(args { is_map: false })]
     pub r#struct: Struct,
 }

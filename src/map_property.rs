@@ -1,7 +1,8 @@
+use std::io::{Read, Seek, SeekFrom};
 use crate::read_bool_from;
 use crate::struct_property::Struct;
 use crate::structs::PrimaryAssetNameProperty;
-use binrw::binrw;
+use binrw::{binrw, BinRead, BinResult};
 use binrw::helpers::until_exclusive;
 
 // A struct without a name
@@ -18,6 +19,16 @@ pub struct MapSubStructProperty {
     #[br(temp)]
     #[bw(ignore)]
     pub unk_name_length: u32,
+    #[br(args { is_map: true })]
+    pub r#struct: Struct,
+}
+
+#[binrw]
+#[derive(Debug)]
+pub struct StructMaybeKey {
+    #[br(temp)]
+    #[bw(ignore)]
+    pub unk_name_length: u32,
     #[br(count = unk_name_length)]
     #[bw(map = |x : &String | x.as_bytes())]
     #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
@@ -29,11 +40,12 @@ pub struct MapSubStructProperty {
     #[br(count = unk_type_length)]
     #[bw(map = |x : &String | x.as_bytes())]
     #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
+    #[br(pad_after = 8)] // nothingness and then length for the struct
     pub unk_type: String,
-    #[br(temp)]
-    #[bw(ignore)]
-    #[br(pad_before = 8)] // dunno what this is
-    pub name_length: u32,
+
+    #[br(dbg)]
+    #[br(pad_before = 4)] // type length
+    #[br(args { is_map: true })]
     pub r#struct: Struct,
 }
 
@@ -100,16 +112,12 @@ pub struct GuidStruct {
 // Used in MapProperty exclusively, seems to be a shortened version of some Properties
 #[binrw]
 #[derive(Debug)]
-#[br(import { magic: &str, unk: &UnknownType, is_value: bool })]
+#[br(import { magic: &str, is_value: bool })]
 pub enum MabSubProperty {
     #[br(pre_assert("NameProperty" == magic))]
     Name(MapSubNameProperty),
-    #[br(pre_assert("StructProperty" == magic && *unk == UnknownType::RealStruct))]
+    #[br(pre_assert("StructProperty" == magic))]
     Struct(MapSubStructProperty),
-    #[br(pre_assert("StructProperty" == magic && *unk == UnknownType::AnonymousStruct))]
-    AnonymousStruct(AnonymousStruct), // assuming all value structs are anonymous for now
-    #[br(pre_assert("StructProperty" == magic && *unk == UnknownType::Guid || *unk == UnknownType::Guid2))]
-    GuidStruct(GuidStruct), // assuming all value structs are anonymous for now
     #[br(pre_assert("FloatProperty" == magic))]
     Float(MapSubFloatProperty),
     #[br(pre_assert("StrProperty" == magic))]
@@ -124,42 +132,102 @@ pub enum MabSubProperty {
 
 #[binrw]
 #[derive(Debug)]
-#[br(import(key_type: &str, value_type: &str, key_unk: &UnknownType, value_unk: &UnknownType))]
-pub struct MapEntry {
-    //#[br(pad_before = 8)]
-    #[br(args { magic: key_type, unk: key_unk, is_value: true})]
-    pub key: MabSubProperty,
+pub struct GuidStructThing {
+    pub guid: [u8; 16],
+}
 
-    #[br(args {magic: value_type, unk: value_unk, is_value: true})]
-    //#[br(if(!key_is_none(&key)))]
+#[binrw]
+#[derive(Debug)]
+pub struct SomeIDStruct {
+    pub guid: [u8; 16],
+}
+
+#[binrw]
+#[derive(Debug)]
+pub struct SomeID2Struct {
+    pub guid: [u8; 16],
+}
+
+#[binrw]
+#[derive(Debug)]
+pub struct StringMapKey {
+    pub enum_length: u32,
+    #[br(count = enum_length)]
+    #[bw(map = |x : &String | x.as_bytes())]
+    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
+    pub r#enum: String,
+}
+
+#[binrw]
+#[derive(Debug)]
+#[br(import { magic: &KeyType })]
+pub enum MapKeyProperty {
+    #[br(pre_assert(*magic == KeyType::String))]
+    String(StringMapKey),
+    #[br(pre_assert(*magic == KeyType::StructMaybe))]
+    StructMaybe(StructMaybeKey),
+    #[br(pre_assert(*magic == KeyType::Enum))]
+    Enum(MapSubEnumProperty),
+    #[br(pre_assert(*magic == KeyType::EnumAgain))]
+    EnumAgain(MapSubEnumProperty),
+    #[br(pre_assert(*magic == KeyType::GUID))]
+    GUID(GuidStructThing),
+    #[br(pre_assert(*magic == KeyType::SomeID))]
+    SomeID(SomeIDStruct),
+    #[br(pre_assert(*magic == KeyType::SomeID2))]
+    SomeID2(SomeID2Struct),
+}
+
+fn is_empty(key: &MapKeyProperty) -> bool {
+    false
+}
+
+#[binrw]
+#[derive(Debug)]
+#[br(import(key_type: &KeyType, value_type: &str))]
+pub struct MapEntry {
+    #[br(args { magic: key_type})]
+    #[br(dbg)]
+    pub key: MapKeyProperty,
+
+    #[br(args {magic: value_type, is_value: true})]
+    #[br(dbg)]
     pub value: MabSubProperty,
 }
 
 #[binrw]
-#[brw(repr = u8)]
-#[derive(Debug, PartialEq)]
-pub enum UnknownType {
-    // literally all guesswork, idk
-    String = 0x0,
-    Name = 0x31,
-    Int = 0xBA,
-    RealStruct = 0x51,
-    Enum = 0x21,
-    Guid = 0x45,
-    IDK = 0x44,
-    Guid2 = 0x5,
-    AnonymousStruct = 0xF,
+#[brw(repr = u32)]
+#[derive(Debug)]
+#[derive(PartialEq, Clone)]
+pub enum KeyType {
+    String = 0x1,
+    GUID = 0x3,
+    SomeID = 0x6,
+    SomeID2 = 0x10,
+    EnumAgain = 0x4,
+    Enum = 0x7,
+    StructMaybe = 0xC,
+}
+
+#[binrw::parser(reader, endian)]
+fn custom_parser(size_in_bytes: u32, key_type: &KeyType, value_type: &str) -> BinResult<Vec<MapEntry>> {
+    let mut result = Vec::<MapEntry>::new();
+
+    let mut current = reader.stream_position().unwrap();
+    let end = current + size_in_bytes as u64 - 5 - 3;
+    
+    while current < end {
+        result.push(MapEntry::read_options(reader, endian, (&key_type, &value_type)).unwrap());
+        current = reader.stream_position().unwrap();
+    }
+    Ok(result)
 }
 
 #[binrw]
 #[derive(Debug)]
 pub struct MapProperty {
-    /*
-    pub key_unk: UnknownType,
-    #[br(pad_after = 2)] // actually might need all 4 bytes?
-
-    pub value_unk: UnknownType,*/
     // Plus this int
+    #[br(dbg)]
     pub size_in_bytes: u32,
 
     #[br(temp)]
@@ -179,16 +247,12 @@ pub struct MapProperty {
     #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub value_name: String,
 
-    //#[br(pad_before = 5)]
-    //
-    //pub num_map_entries: u32,
-    #[br(count = size_in_bytes + 1)]
-    #[br(temp)]
-    #[bw(ignore)]
-    pub dummy_data: Vec<u8>,
-    // TODO: uncomment when map parsing reliably works, otherwise just dummy the data out
-    //#[br(count = num_map_entries, args { inner: (&*key_name, &*value_name, &key_unk, &value_unk) })]
-    //pub entries: Vec<MapEntry>,
+    #[br(pad_before = 5)]
+    #[br(dbg)]
+    pub key_type: KeyType,
+
+    #[br(parse_with = custom_parser, args(size_in_bytes, &key_type, &value_name))]
+    pub entries: Vec<MapEntry>,
 }
 
 #[cfg(test)]
@@ -215,14 +279,14 @@ mod tests {
         assert_eq!(decoded.size_in_bytes, 49);
         assert_eq!(decoded.key_name, "StrProperty");
         assert_eq!(decoded.value_name, "StrProperty");
-        /*let String(key_property) = &decoded.entries.first().unwrap().key else {
+        let MapKeyProperty::String(key_property) = &decoded.entries.first().unwrap().key else {
             panic!("StrProperty!")
         };
         let String(value_property) = &decoded.entries.first().unwrap().value else {
             panic!("StrProperty!")
         };
-        assert_eq!(key_property.name, "AR0XJGFWA6HNIQ1AAUJ9UR828");
-        assert_eq!(value_property.name, "NAME 1");*/
+        assert_eq!(key_property.r#enum, "AR0XJGFWA6HNIQ1AAUJ9UR828");
+        assert_eq!(value_property.name, "NAME 1");
     }
 
     #[test]
@@ -252,14 +316,14 @@ mod tests {
         assert_eq!(decoded.size_in_bytes, 186);
         assert_eq!(decoded.key_name, "NameProperty");
         assert_eq!(decoded.value_name, "IntProperty");
-        /*let Name(key_property) = &decoded.entries.first().unwrap().key else {
+        let MapKeyProperty::Enum(key_property) = &decoded.entries.first().unwrap().key else {
             panic!("Name!")
         };
         let Int(value_property) = &decoded.entries.first().unwrap().value else {
             panic!("Int!")
         };
-        assert_eq!(key_property.sub_property_name, "SelectedMachine");
-        assert_eq!(value_property.value, 2);*/
+        assert_eq!(key_property.r#enum, "SelectedMachine");
+        assert_eq!(value_property.value, 2);
         // TODO: test the rest of the values
     }
 }
