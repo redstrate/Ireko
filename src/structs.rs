@@ -1,6 +1,7 @@
 use crate::Property;
 use binrw::binrw;
 use crate::common::read_string_with_length;
+use crate::guid::Guid;
 
 #[binrw]
 #[derive(Debug)]
@@ -82,7 +83,8 @@ pub struct DAAssembleIdDataStruct {
 #[binrw]
 #[derive(Debug)]
 pub struct GuidStruct {
-    pub unk: [u8; 33],
+    #[br(pad_before = 17)]
+    pub guid: Guid
 }
 
 #[binrw]

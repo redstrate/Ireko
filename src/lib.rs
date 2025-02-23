@@ -8,6 +8,7 @@ pub mod set_property;
 pub mod str_property;
 pub mod struct_property;
 mod structs;
+mod guid;
 
 use binrw::helpers::{until, until_eof};
 

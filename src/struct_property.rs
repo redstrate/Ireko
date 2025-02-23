@@ -1,10 +1,6 @@
-use crate::structs::{
-    CarryCountProperty, DAAssembleIdDataStruct, DABuildDataStruct, DACharacterCommonStatusStruct,
-    DALoadOptionStruct, DAMachineColoringDataStruct, DAModuleColorStruct, DAModuleItemDataStruct,
-    DateTimeStruct, GuidStruct, LinearColorStruct, PrimaryAssetIdStruct, PrimaryAssetNameProperty,
-    SaveSlotInfoStruct,
-};
+use crate::structs::{CarryCountProperty, DAAssembleIdDataStruct, DABuildDataStruct, DACharacterCommonStatusStruct, DALoadOptionStruct, DAMachineColoringDataStruct, DAModuleColorStruct, DAModuleItemDataStruct, DateTimeStruct, GuidStruct, LinearColorStruct, PrimaryAssetIdStruct, PrimaryAssetNameProperty, SaveSlotInfoStruct};
 use binrw::binrw;
+use crate::guid::Guid;
 
 #[binrw]
 #[derive(Debug)]

@@ -3,6 +3,7 @@ use crate::struct_property::Struct;
 use crate::structs::PrimaryAssetNameProperty;
 use binrw::helpers::until_exclusive;
 use binrw::{BinRead, BinResult, binrw};
+use crate::guid::Guid;
 
 // A struct without a name
 #[binrw]
@@ -80,12 +81,6 @@ pub struct MapSubEnumProperty {
     pub value: String,
 }
 
-#[binrw]
-#[derive(Debug)]
-pub struct GuidStruct {
-    pub guid: [u8; 16],
-}
-
 // Used in MapProperty exclusively, seems to be a shortened version of some Properties
 #[binrw]
 #[derive(Debug)]
@@ -109,24 +104,6 @@ pub enum MabSubProperty {
 
 #[binrw]
 #[derive(Debug)]
-pub struct GuidStructThing {
-    pub guid: [u8; 16],
-}
-
-#[binrw]
-#[derive(Debug)]
-pub struct SomeIDStruct {
-    pub guid: [u8; 16],
-}
-
-#[binrw]
-#[derive(Debug)]
-pub struct SomeID2Struct {
-    pub guid: [u8; 16],
-}
-
-#[binrw]
-#[derive(Debug)]
 pub struct StringMapKey {
     #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
@@ -146,11 +123,11 @@ pub enum MapKeyProperty {
     #[br(pre_assert(*magic == KeyType::EnumAgain))]
     EnumAgain(MapSubEnumProperty),
     #[br(pre_assert(*magic == KeyType::GUID))]
-    GUID(GuidStructThing),
+    GUID(Guid),
     #[br(pre_assert(*magic == KeyType::SomeID))]
-    SomeID(SomeIDStruct),
+    SomeID(Guid),
     #[br(pre_assert(*magic == KeyType::SomeID2))]
-    SomeID2(SomeID2Struct),
+    SomeID2(Guid),
 }
 
 #[binrw]
