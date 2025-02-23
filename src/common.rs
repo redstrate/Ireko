@@ -1,5 +1,5 @@
-use std::io::Seek;
-use binrw::{BinRead, BinReaderExt, BinResult};
+use binrw::BinRead;
+use binrw::BinResult;
 
 pub(crate) fn read_bool_from<T: From<u8> + PartialEq>(x: T) -> bool {
     x == T::from(1u8)
@@ -9,7 +9,7 @@ pub(crate) fn read_bool_from<T: From<u8> + PartialEq>(x: T) -> bool {
 pub(crate) fn read_string_with_length() -> BinResult<String> {
     let length = u32::read_le(reader)? as usize;
     if length == 0 {
-        return Ok(String::default());;
+        return Ok(String::default());
     }
     // last byte is the null terminator which Rust ignores
     let length = length - 1;

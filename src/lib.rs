@@ -13,6 +13,7 @@ use binrw::helpers::{until, until_eof};
 
 use crate::array_property::ArrayProperty;
 use crate::bool_property::BoolProperty;
+use crate::common::read_string_with_length;
 use crate::float_property::FloatProperty;
 use crate::int_property::IntProperty;
 use crate::map_property::MapProperty;
@@ -20,36 +21,12 @@ use crate::set_property::SetProperty;
 use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
 use binrw::binrw;
-use crate::common::read_string_with_length;
-
-#[binrw]
-#[derive(Debug)]
-pub enum Property {
-    #[br(magic = b"IntProperty\0")]
-    Int(IntProperty),
-    #[br(magic = b"BoolProperty\0")]
-    Bool(BoolProperty),
-    #[br(magic = b"StructProperty\0")]
-    Struct(StructProperty),
-    #[br(magic = b"FloatProperty\0")]
-    Float(FloatProperty),
-    #[br(magic = b"StrProperty\0")]
-    String(StrProperty),
-    #[br(magic = b"NameProperty\0")]
-    Name(StrProperty),
-    #[br(magic = b"ArrayProperty\0")]
-    Array(ArrayProperty),
-    #[br(magic = b"MapProperty\0")]
-    Map(MapProperty),
-    #[br(magic = b"SetProperty\0")]
-    Set(SetProperty),
-}
 
 // Used in ArrayProperty exclusively, but could be used instead of magic above
 #[binrw]
 #[derive(Debug)]
 #[br(import { magic: &str })]
-pub enum StringBasedProperty {
+pub enum Property {
     #[br(pre_assert("NameProperty" == magic))]
     Name(StrProperty),
     #[br(pre_assert("StructProperty" == magic))]
@@ -83,7 +60,7 @@ pub struct Entry {
     pub type_name: String,
 
     #[br(if(name != "None"), args { magic: &type_name })]
-    pub r#type: Option<StringBasedProperty>,
+    pub r#type: Option<Property>,
 }
 
 #[binrw]

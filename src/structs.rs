@@ -1,4 +1,4 @@
-use crate::{Property, StringBasedProperty};
+use crate::Property;
 use binrw::binrw;
 
 #[binrw]
@@ -27,14 +27,6 @@ pub struct DACharacterCommonStatusStruct {
 
 #[binrw]
 #[derive(Debug)]
-pub struct ParamsStruct {
-    pub params_value_type_length: u32,
-
-    pub params_value: Box<Property>,
-}
-
-#[binrw]
-#[derive(Debug)]
 pub struct PrimaryAssetNameProperty {
     #[br(temp)]
     #[bw(ignore)]
@@ -57,7 +49,7 @@ pub struct PrimaryAssetNameProperty {
     #[br(if(property_name != "None"))]
     #[br(args { magic: &type_name})]
     //
-    pub key: Option<Box<StringBasedProperty>>,
+    pub key: Option<Box<Property>>,
 }
 
 #[binrw]
@@ -73,7 +65,7 @@ pub struct CarryCountProperty {
 
     #[br(args { magic: &property_name})]
     //
-    pub key: Option<Box<StringBasedProperty>>,
+    pub key: Option<Box<Property>>,
 }
 
 #[binrw]

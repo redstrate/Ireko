@@ -1,8 +1,8 @@
 use crate::structs::{
     CarryCountProperty, DAAssembleIdDataStruct, DABuildDataStruct, DACharacterCommonStatusStruct,
     DALoadOptionStruct, DAMachineColoringDataStruct, DAModuleColorStruct, DAModuleItemDataStruct,
-    DateTimeStruct, GuidStruct, LinearColorStruct, ParamsStruct, PrimaryAssetIdStruct,
-    PrimaryAssetNameProperty, SaveSlotInfoStruct,
+    DateTimeStruct, GuidStruct, LinearColorStruct, PrimaryAssetIdStruct, PrimaryAssetNameProperty,
+    SaveSlotInfoStruct,
 };
 use binrw::binrw;
 
@@ -17,8 +17,6 @@ pub enum Struct {
     SaveSlotInfo(SaveSlotInfoStruct),
     #[br(magic = b"DACharacterCommonStatus\0")]
     DACharacterCommonStatus(DACharacterCommonStatusStruct),
-    #[br(magic = b"Params\0")]
-    Params(ParamsStruct),
     #[br(magic = b"PrimaryAssetType\0")]
     PrimaryAssetType {
         #[br(pad_before = 17)]

@@ -1,4 +1,4 @@
-use crate::StringBasedProperty;
+use crate::Property;
 use crate::common::read_string_with_length;
 use binrw::binrw;
 
@@ -14,7 +14,7 @@ pub struct SetEntry {
     pub unk_type: String,
 
     #[br(args { magic: &unk_type })]
-    pub key: StringBasedProperty,
+    pub key: Property,
 }
 
 #[binrw]
