@@ -1,5 +1,6 @@
 use crate::Property;
 use binrw::binrw;
+use crate::common::read_string_with_length;
 
 #[binrw]
 #[derive(Debug)]
@@ -28,43 +29,27 @@ pub struct DACharacterCommonStatusStruct {
 #[binrw]
 #[derive(Debug)]
 pub struct PrimaryAssetNameProperty {
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub property_name_length: u32,
-    #[br(count = property_name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub property_name: String,
 
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    #[br(if(property_name != "None"))]
-    pub type_length: u32,
-    #[br(count = type_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-    #[br(if(property_name != "None"))]
     pub type_name: String,
 
     #[br(if(property_name != "None"))]
     #[br(args { magic: &type_name})]
-    //
     pub key: Option<Box<Property>>,
 }
 
 #[binrw]
 #[derive(Debug)]
 pub struct CarryCountProperty {
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub property_name_length: u32,
-    #[br(count = property_name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub property_name: String,
 
     #[br(args { magic: &property_name})]
-    //
     pub key: Option<Box<Property>>,
 }
 
