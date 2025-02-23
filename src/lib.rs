@@ -20,6 +20,7 @@ use crate::set_property::SetProperty;
 use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
 use binrw::binrw;
+use crate::common::read_string_with_length;
 
 #[binrw]
 #[derive(Debug)]
@@ -61,6 +62,8 @@ pub enum StringBasedProperty {
     Bool(BoolProperty),
     #[br(pre_assert("IntProperty" == magic))]
     Int(IntProperty),
+    #[br(pre_assert("ArrayProperty" == magic))]
+    Array(ArrayProperty),
     #[br(pre_assert("MapProperty" == magic))]
     Map(MapProperty),
     #[br(pre_assert("SetProperty" == magic))]
@@ -70,19 +73,17 @@ pub enum StringBasedProperty {
 #[binrw]
 #[derive(Debug)]
 pub struct Entry {
-    #[br(temp)]
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    pub name_length: u32,
-    #[br(count = name_length)]
-    #[bw(map = |x : &String | x.as_bytes())]
-    #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
     pub name: String,
-    #[br(temp)]
+
+    #[br(parse_with = read_string_with_length)]
     #[bw(ignore)]
-    #[br(if(name != "None"))]
-    pub type_length: Option<u32>,
-    #[br(if(name != "None"))]
-    pub r#type: Option<Property>,
+    #[br(temp, if(name != "None"))]
+    pub type_name: String,
+
+    #[br(if(name != "None"), args { magic: &type_name })]
+    pub r#type: Option<StringBasedProperty>,
 }
 
 #[binrw]
