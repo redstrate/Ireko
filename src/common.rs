@@ -1,4 +1,4 @@
-use binrw::BinRead;
+use binrw::{BinRead, BinWrite};
 use binrw::BinResult;
 
 pub(crate) fn read_bool_from<T: From<u8> + PartialEq>(x: T) -> bool {
@@ -24,6 +24,26 @@ pub(crate) fn read_string_with_length() -> BinResult<String> {
         message: "dummy".to_string(),
     }))
 }
+
+#[binrw::writer(writer, endian)]
+pub(crate) fn write_string_with_length(string: &String) -> BinResult<()> {
+    if string.is_empty() {
+        let length = 0u32;
+        length.write_le(writer)?;
+        return Ok(());
+    }
+    // + 1 for the null terminator
+    let length = string.len() as u32 + 1;
+    length.write_le(writer)?;
+    for char in string.chars() {
+        let byte = char as u8;
+        byte.write_le(writer)?;
+    }
+    let null_terminator = 0u8;
+    null_terminator.write_le(writer)?;
+    Ok(())
+}
+
 
 #[cfg(test)]
 mod tests {
