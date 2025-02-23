@@ -1,6 +1,5 @@
 pub mod array_property;
 pub mod bool_property;
-pub mod enum_property;
 pub mod float_property;
 pub mod int_property;
 pub mod map_property;
@@ -14,7 +13,6 @@ use binrw::helpers::{until, until_eof};
 
 use crate::array_property::ArrayProperty;
 use crate::bool_property::BoolProperty;
-use crate::enum_property::EnumProperty;
 use crate::float_property::FloatProperty;
 use crate::int_property::IntProperty;
 use crate::map_property::MapProperty;
@@ -49,8 +47,6 @@ pub enum Property {
     Map(MapProperty),
     #[br(magic = b"SetProperty\0")]
     Set(SetProperty),
-    #[br(magic = b"EnumProperty\0")]
-    Enum(EnumProperty),
 }
 
 // Used in ArrayProperty exclusively, but could be used instead of magic above
