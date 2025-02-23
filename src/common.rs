@@ -1,3 +1,4 @@
+use std::io::Seek;
 use binrw::{BinRead, BinReaderExt, BinResult};
 
 pub(crate) fn read_bool_from<T: From<u8> + PartialEq>(x: T) -> bool {
@@ -6,8 +7,12 @@ pub(crate) fn read_bool_from<T: From<u8> + PartialEq>(x: T) -> bool {
 
 #[binrw::parser(reader, endian)]
 pub(crate) fn read_string_with_length() -> BinResult<String> {
+    let length = u32::read_le(reader)? as usize;
+    if length == 0 {
+        return Ok(String::default());;
+    }
     // last byte is the null terminator which Rust ignores
-    let length = u32::read_le(reader)? as usize - 1;
+    let length = length - 1;
     let mut bytes: Vec<u8> = vec![0u8; length];
     // TODO: there was to be way to read this all in one go?
     for i in 0..length {
