@@ -17,11 +17,11 @@ pub enum Struct {
     #[br(magic = b"PrimaryAssetType\0")]
     PrimaryAssetType {
         #[br(pad_before = 17)]
-        #[br(dbg)]
+
         name: PrimaryAssetNameProperty,
         #[br(pad_before = 9)] // "None" and it's length in bytes plus the null terminator
         #[br(pad_after = 9)] // ditto
-        #[br(dbg)]
+
         primary_asset_name: PrimaryAssetNameProperty,
     },
     #[br(magic = b"PrimaryAssetId\0")]
@@ -42,16 +42,16 @@ pub enum Struct {
     LinearColor(LinearColorStruct),
     #[br(magic = b"CarryCount\0")]
     CarryCount {
-        #[br(dbg)]
+
         carry_count: CarryCountProperty,
-        #[br(dbg)]
+
         #[br(pad_before = 15)] // "StoreCount" + 4 bytes for length + 1 byte for endofstring
         #[br(pad_after = 9)] // "None" + 1 byte for endofstring + 4 bytes for length
         store_count: CarryCountProperty,
     },
     #[br(magic = b"Map\0")]
     Map {
-        #[br(dbg)]
+
         #[br(pad_after = 9)] // "None" + 1 byte for endofstring + 4 bytes for length
         map: CarryCountProperty,
     },
@@ -59,20 +59,20 @@ pub enum Struct {
     #[br(magic = b"ID\0")]
     ID {
         unk: [u8; 149], // not sure how to parse this yet
-        #[br(dbg)]
+
         #[br(pad_after = 9)] // "None" and it's length in bytes plus the null terminator
         name: PrimaryAssetNameProperty,
 
-        #[br(dbg)]
+
         #[br(pad_after = 9)] // "None" and it's length in bytes plus the null terminator
         primary_asset_name: PrimaryAssetNameProperty,
 
-        #[br(dbg)]
+
         data: [u8; 137],
     },
     #[br(magic = b"Set\0")]
     Set {
-        #[br(dbg)]
+
         #[br(pad_after = 9)] // "None" + 1 byte for endofstring + 4 bytes for length
         set: CarryCountProperty,
     },

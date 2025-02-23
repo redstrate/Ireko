@@ -77,7 +77,7 @@ pub enum StringBasedProperty {
 pub struct Entry {
     #[br(temp)]
     #[bw(ignore)]
-    #[br(dbg)]
+
     pub name_length: u32,
     #[br(count = name_length)]
     #[bw(map = |x : &String | x.as_bytes())]

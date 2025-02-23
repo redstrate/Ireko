@@ -41,7 +41,7 @@ pub struct StructMaybeKey {
     #[br(pad_after = 8)] // nothingness and then length for the struct
     pub unk_type: String,
 
-    #[br(dbg)]
+
     #[br(pad_before = 4)] // type length
     pub r#struct: Struct,
 }
@@ -180,11 +180,11 @@ pub enum MapKeyProperty {
 #[br(import(key_type: &KeyType, value_type: &str))]
 pub struct MapEntry {
     #[br(args { magic: key_type})]
-    #[br(dbg)]
+
     pub key: MapKeyProperty,
 
     #[br(args { magic: value_type })]
-    #[br(dbg)]
+
     pub value: MabSubProperty,
 }
 
@@ -220,7 +220,7 @@ fn custom_parser(size_in_bytes: u32, key_type: &KeyType, value_type: &str) -> Bi
 #[derive(Debug)]
 pub struct MapProperty {
     // Plus this int
-    #[br(dbg)]
+
     pub size_in_bytes: u32,
 
     #[br(temp)]
@@ -241,7 +241,7 @@ pub struct MapProperty {
     pub value_name: String,
 
     #[br(pad_before = 5)]
-    #[br(dbg)]
+
     pub key_type: KeyType,
 
     #[br(parse_with = custom_parser, args(size_in_bytes, &key_type, &value_name))]

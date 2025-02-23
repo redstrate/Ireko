@@ -21,7 +21,7 @@ pub struct SetEntry {
     pub unk_type: String,
 
     #[br(args { magic: &unk_type })]
-    #[br(dbg)]
+
     pub key: StringBasedProperty,
 }
 

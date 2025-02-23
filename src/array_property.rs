@@ -9,7 +9,6 @@ fn custom_parser(size_in_bytes: u32, value_type: &str) -> BinResult<Vec<ArrayEnt
     let end = current + size_in_bytes as u64 - 4;
 
     while current < end {
-        println!("current: {}, end: {}", current, end);
         result.push(ArrayEntry::read_options(reader, endian, (value_type,)).unwrap());
         current = reader.stream_position().unwrap();
     }
@@ -22,7 +21,7 @@ fn custom_parser(size_in_bytes: u32, value_type: &str) -> BinResult<Vec<ArrayEnt
 #[br(import(value_type: &str))]
 pub struct ArrayEntry {
     #[br(args { magic: &value_type })]
-    #[br(dbg)]
+
     pub key: MabSubProperty,
 }
 
@@ -30,7 +29,7 @@ pub struct ArrayEntry {
 #[derive(Debug)]
 pub struct ArrayProperty {
     // Plus this int
-    #[br(dbg)]
+
     pub size_in_bytes: u32,
 
     #[br(temp)]
@@ -40,7 +39,7 @@ pub struct ArrayProperty {
     #[br(count = key_name_length)]
     #[bw(map = |x : &String | x.as_bytes())]
     #[br(map = | x: Vec<u8> | String::from_utf8(x).unwrap().trim_matches(char::from(0)).to_string())]
-    #[br(dbg)]
+
     pub key_name: String,
 
     #[br(pad_before = 1)]
