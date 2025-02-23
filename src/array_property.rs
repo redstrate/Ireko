@@ -6,12 +6,12 @@ use binrw::{BinRead, BinResult, binrw};
 fn custom_parser(size_in_bytes: u32, value_type: &str) -> BinResult<Vec<ArrayEntry>> {
     let mut result = Vec::<ArrayEntry>::new();
 
-    let mut current = reader.stream_position().unwrap();
+    let mut current = reader.stream_position()?;
     let end = current + size_in_bytes as u64 - 4;
 
     while current < end {
-        result.push(ArrayEntry::read_options(reader, endian, (value_type,)).unwrap());
-        current = reader.stream_position().unwrap();
+        result.push(ArrayEntry::read_options(reader, endian, (value_type,))?);
+        current = reader.stream_position()?;
     }
     Ok(result)
 }

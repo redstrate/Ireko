@@ -185,12 +185,12 @@ fn custom_parser(
 ) -> BinResult<Vec<MapEntry>> {
     let mut result = Vec::<MapEntry>::new();
 
-    let mut current = reader.stream_position().unwrap();
+    let mut current = reader.stream_position()?;
     let end = current + size_in_bytes as u64 - 5 - 3;
 
     while current < end {
-        result.push(MapEntry::read_options(reader, endian, (key_type, value_type)).unwrap());
-        current = reader.stream_position().unwrap();
+        result.push(MapEntry::read_options(reader, endian, (key_type, value_type))?);
+        current = reader.stream_position()?;
     }
     Ok(result)
 }
