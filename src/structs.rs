@@ -10,7 +10,7 @@ pub struct DateTimeStruct {
 #[binrw]
 #[derive(Debug)]
 pub struct DALoadOptionStruct {
-    pub unk: [u8; 17],
+    pub unk: [u8; 69], // Contains LoadType property
 }
 
 #[binrw]

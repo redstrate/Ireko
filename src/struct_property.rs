@@ -76,6 +76,10 @@ pub enum Struct {
         #[br(pad_after = 9)] // "None" + 1 byte for endofstring + 4 bytes for length
         set: CarryCountProperty,
     },
+    #[br(magic = b"ItemSlots\0")]
+    ItemSlots {
+        unk: [u8; 2125]
+    },
 }
 
 #[binrw]
