@@ -24,7 +24,7 @@ use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
 use binrw::binrw;
 
-pub(crate) fn read_bool_from<T: std::convert::From<u8> + std::cmp::PartialEq>(x: T) -> bool {
+pub(crate) fn read_bool_from<T: From<u8> + PartialEq>(x: T) -> bool {
     x == T::from(1u8)
 }
 

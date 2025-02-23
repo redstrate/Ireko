@@ -8,7 +8,7 @@ use std::io::{Cursor, Read};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
 
-    let mut data = std::io::Cursor::new(std::fs::read(&args[1])?);
+    let mut data = Cursor::new(std::fs::read(&args[1])?);
 
     let compressed = CompressedSaveFile::read_le(&mut data)?;
 
@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let decompress = Decompress::new(true);
 
     let mut d = ZlibDecoder::new_with_decompress(&*compressed.compressed_data, decompress);
-    let size = d.read(&mut *uncompressed)?;
+    let size = d.read(&mut uncompressed)?;
     output.extend_from_slice(&uncompressed[..size]);
     std::fs::write("output.bin", &output)?;
 

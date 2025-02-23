@@ -1,9 +1,8 @@
-use std::io::{Read, Seek, SeekFrom};
 use crate::read_bool_from;
 use crate::struct_property::Struct;
 use crate::structs::PrimaryAssetNameProperty;
-use binrw::{binrw, BinRead, BinResult};
 use binrw::helpers::until_exclusive;
+use binrw::{binrw, BinRead, BinResult};
 
 // A struct without a name
 #[binrw]
@@ -19,7 +18,6 @@ pub struct MapSubStructProperty {
     #[br(temp)]
     #[bw(ignore)]
     pub unk_name_length: u32,
-    #[br(args { is_map: true })]
     pub r#struct: Struct,
 }
 
@@ -45,7 +43,6 @@ pub struct StructMaybeKey {
 
     #[br(dbg)]
     #[br(pad_before = 4)] // type length
-    #[br(args { is_map: true })]
     pub r#struct: Struct,
 }
 
@@ -112,7 +109,7 @@ pub struct GuidStruct {
 // Used in MapProperty exclusively, seems to be a shortened version of some Properties
 #[binrw]
 #[derive(Debug)]
-#[br(import { magic: &str, is_value: bool })]
+#[br(import { magic: &str })]
 pub enum MabSubProperty {
     #[br(pre_assert("NameProperty" == magic))]
     Name(MapSubNameProperty),
@@ -178,10 +175,6 @@ pub enum MapKeyProperty {
     SomeID2(SomeID2Struct),
 }
 
-fn is_empty(key: &MapKeyProperty) -> bool {
-    false
-}
-
 #[binrw]
 #[derive(Debug)]
 #[br(import(key_type: &KeyType, value_type: &str))]
@@ -190,7 +183,7 @@ pub struct MapEntry {
     #[br(dbg)]
     pub key: MapKeyProperty,
 
-    #[br(args {magic: value_type, is_value: true})]
+    #[br(args { magic: value_type })]
     #[br(dbg)]
     pub value: MabSubProperty,
 }
@@ -215,9 +208,9 @@ fn custom_parser(size_in_bytes: u32, key_type: &KeyType, value_type: &str) -> Bi
 
     let mut current = reader.stream_position().unwrap();
     let end = current + size_in_bytes as u64 - 5 - 3;
-    
+
     while current < end {
-        result.push(MapEntry::read_options(reader, endian, (&key_type, &value_type)).unwrap());
+        result.push(MapEntry::read_options(reader, endian, (key_type, value_type)).unwrap());
         current = reader.stream_position().unwrap();
     }
     Ok(result)
@@ -258,7 +251,7 @@ pub struct MapProperty {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::map_property::MabSubProperty::{Int, Name, String};
+    use crate::map_property::MabSubProperty::{Int, String};
     use binrw::BinRead;
     use std::io::Cursor;
 

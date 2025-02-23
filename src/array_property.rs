@@ -1,16 +1,15 @@
 use crate::set_property::SetEntry;
 use binrw::{binrw, BinRead, BinResult};
-use crate::map_property::{KeyType, MapEntry};
 
 #[binrw::parser(reader, endian)]
-fn custom_parser(size_in_bytes: u32, key_name: &str) -> BinResult<Vec<SetEntry>> {
+fn custom_parser(size_in_bytes: u32) -> BinResult<Vec<SetEntry>> {
     let mut result = Vec::<SetEntry>::new();
 
     let mut current = reader.stream_position().unwrap();
     let end = current + size_in_bytes as u64 - 4;
 
     while current < end {
-        result.push(SetEntry::read_options(reader, endian, (key_name,)).unwrap());
+        result.push(SetEntry::read_options(reader, endian, ()).unwrap());
         current = reader.stream_position().unwrap();
     }
     Ok(result)
@@ -34,6 +33,6 @@ pub struct ArrayProperty {
     #[br(pad_before = 1)]
     pub unk: u32,
 
-    #[br(parse_with = custom_parser, args(size_in_bytes, &key_name))]
+    #[br(parse_with = custom_parser, args(size_in_bytes))]
     pub entries: Vec<SetEntry>,
 }

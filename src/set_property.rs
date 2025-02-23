@@ -3,7 +3,6 @@ use binrw::binrw;
 
 #[binrw]
 #[derive(Debug)]
-#[br(import(key_type: &str))]
 pub struct SetEntry {
     #[br(temp)]
     #[bw(ignore)]
@@ -41,7 +40,7 @@ pub struct SetProperty {
     #[br(pad_before = 5)]
     pub num_set_entries: u32,
 
-    #[br(count = num_set_entries, args { inner: (&*key_name,) })]
+    #[br(count = num_set_entries)]
     pub entries: Vec<SetEntry>,
 }
 

@@ -3,7 +3,6 @@ use binrw::binrw;
 
 #[binrw]
 #[derive(Debug)]
-#[br(import { is_map: bool })]
 pub enum Struct {
     #[br(magic = b"DateTime\0")]
     DateTime(DateTimeStruct),
@@ -87,6 +86,5 @@ pub struct StructProperty {
     #[bw(ignore)]
     #[br(pad_before = 4)]
     pub name_length: u32,
-    #[br(args { is_map: false })]
     pub r#struct: Struct,
 }
