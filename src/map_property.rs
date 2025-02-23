@@ -1,4 +1,4 @@
-use crate::common::{read_bool_from, read_string_with_length};
+use crate::common::{read_bool_from, read_string_with_length, write_string_with_length};
 use crate::struct_property::Struct;
 use crate::structs::PrimaryAssetNameProperty;
 use binrw::helpers::until_exclusive;
@@ -26,11 +26,12 @@ pub struct MapSubStructProperty {
 #[derive(Debug)]
 pub struct StructMaybeKey {
     #[br(parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[bw(write_with = write_string_with_length)]
     pub unk_name: String,
 
-    #[br(pad_after = 8, parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[brw(pad_after = 8)]
+    #[br(parse_with = read_string_with_length)]
+    #[bw(write_with = write_string_with_length)]
     pub unk_type: String,
 
     #[br(pad_before = 4)] // type length
@@ -47,7 +48,7 @@ pub struct MapSubFloatProperty {
 #[derive(Debug)]
 pub struct MapSubNameProperty {
     #[br(parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[bw(write_with = write_string_with_length)]
     pub value: String,
 }
 
@@ -55,7 +56,7 @@ pub struct MapSubNameProperty {
 #[derive(Debug)]
 pub struct MapSubStrProperty {
     #[br(parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[bw(write_with = write_string_with_length)]
     pub value: String,
 }
 
@@ -77,7 +78,7 @@ pub struct MapSubIntProperty {
 #[derive(Debug)]
 pub struct MapSubEnumProperty {
     #[br(parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[bw(write_with = write_string_with_length)]
     pub value: String,
 }
 
@@ -106,7 +107,7 @@ pub enum MabSubProperty {
 #[derive(Debug)]
 pub struct StringMapKey {
     #[br(parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[bw(write_with = write_string_with_length)]
     pub value: String,
 }
 
@@ -182,15 +183,16 @@ pub struct MapProperty {
     // Plus this int
     pub size_in_bytes: u32,
 
-    #[br(pad_before = 4, parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[brw(pad_before = 4)]
+    #[br(parse_with = read_string_with_length)]
+    #[bw(write_with = write_string_with_length)]
     pub key_name: String,
 
     #[br(parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[bw(write_with = write_string_with_length)]
     pub value_name: String,
 
-    #[br(pad_before = 5)]
+    #[brw(pad_before = 5)]
     pub key_type: KeyType,
 
     #[br(parse_with = custom_parser, args(size_in_bytes, &key_type, &value_name))]

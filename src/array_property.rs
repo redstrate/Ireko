@@ -1,4 +1,4 @@
-use crate::common::read_string_with_length;
+use crate::common::{read_string_with_length, write_string_with_length};
 use crate::map_property::MabSubProperty;
 use binrw::{BinRead, BinResult, binrw};
 
@@ -24,17 +24,24 @@ pub struct ArrayEntry {
     pub key: MabSubProperty,
 }
 
+fn calc_size_in_bytes(entries: &Vec<ArrayEntry>) -> u32 {
+    // TODO: stub
+    18
+}
+
 #[binrw]
 #[derive(Debug)]
 pub struct ArrayProperty {
-    // Plus this int
+    #[bw(calc = calc_size_in_bytes(entries))]
     pub size_in_bytes: u32,
 
-    #[br(pad_before = 4, parse_with = read_string_with_length)]
-    #[bw(ignore)]
+    #[brw(pad_before = 4)]
+    #[br(parse_with = read_string_with_length)]
+    #[bw(write_with = write_string_with_length)]
     pub key_name: String,
 
-    #[br(pad_before = 1)]
+    #[brw(pad_before = 1)]
+    #[bw(calc = 1)]
     pub unk: u32,
 
     #[br(parse_with = custom_parser, args(size_in_bytes, &key_name))]
@@ -45,11 +52,12 @@ pub struct ArrayProperty {
 mod tests {
     use super::*;
     use crate::map_property::MabSubProperty::String;
-    use binrw::BinRead;
+    use binrw::{BinRead, BinWrite};
     use std::io::Cursor;
+    use crate::map_property::MapSubStrProperty;
 
     #[test]
-    fn simple_array() {
+    fn read_simple_array() {
         // From Slot.sav
         let data = [
             0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x53, 0x74,
@@ -59,11 +67,38 @@ mod tests {
         ];
         let mut cursor = Cursor::new(data);
         let decoded = ArrayProperty::read_le(&mut cursor).unwrap();
-        assert_eq!(decoded.size_in_bytes, 18);
         assert_eq!(decoded.key_name, "StrProperty");
         let String(value_property) = &decoded.entries.first().unwrap().key else {
             panic!("StrProperty!")
         };
         assert_eq!(value_property.value, "redstrate");
+    }
+
+    #[test]
+    fn write_simple_array() {
+        let expected_data: [u8; 43] = [
+            0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x53, 0x74,
+            0x72, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x79, 0x00, 0x00, 0x01, 0x00, 0x00,
+            0x00, 0x0a, 0x00, 0x00, 0x00, 0x72, 0x65, 0x64, 0x73, 0x74, 0x72, 0x61, 0x74, 0x65,
+            0x00,
+        ];
+        let property = ArrayProperty {
+            key_name: "StrProperty".to_string(),
+            entries: vec![
+                ArrayEntry {
+                    key: String(MapSubStrProperty {
+                        value: "redstrate".to_string(),
+                    }),
+                }
+            ],
+        };
+
+        let mut buffer: Vec<u8> = Vec::new();
+        {
+            let mut cursor = Cursor::new(&mut buffer);
+            property.write_le(&mut cursor).unwrap();
+        }
+
+        assert_eq!(expected_data, &buffer[..]);
     }
 }
