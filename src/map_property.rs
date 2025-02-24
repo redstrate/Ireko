@@ -144,6 +144,8 @@ pub enum MapKeyProperty {
     ArrayStruct(StructMaybeKey),
     #[br(pre_assert(*magic == KeyType::Unknown2))]
     SomeID3(Guid),
+    #[br(pre_assert(*magic == KeyType::SoftObjectProperty))]
+    SoftObjectProperty(StringMapKey),
 }
 
 #[binrw]
@@ -167,6 +169,8 @@ pub enum KeyType {
     SetStruct = 0x2,
     SetStruct2 = 0x2f,
     GUID = 0x3,
+    // Seen in ReadDialogues
+    SoftObjectProperty = 0x5,
     SomeID = 0x6,
     SomeID2 = 0x10,
     EnumAgain = 0x4,
@@ -220,6 +224,7 @@ pub struct MapProperty {
     pub value_name: String,
 
     #[brw(pad_before = 5)]
+    #[br(dbg)]
     pub map_key_type: KeyType,
 
     #[br(parse_with = custom_parser, args(size_in_bytes, &map_key_type, &value_name))]
