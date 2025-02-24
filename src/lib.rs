@@ -69,6 +69,7 @@ pub struct Entry {
 
     #[br(parse_with = read_string_with_length)]
     #[bw(write_with = write_string_with_length)]
+    // TODO: remove the "None" check since that's working around missing "None" padding at the end of structs and elsewhere
     #[br(if(name != "None"))]
     pub type_name: String,
 
