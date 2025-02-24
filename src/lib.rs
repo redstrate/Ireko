@@ -167,6 +167,8 @@ pub struct CompressedBlock {
 #[derive(Debug)]
 pub struct CompressedSaveFile {
     #[br(parse_with = until_eof)]
+    #[br(temp)]
+    #[bw(ignore)]
     pub data: Vec<CompressedBlock>,
     #[br(parse_with = read_tagged_data, args(&data))]
     pub value: TaggedSerialization,
