@@ -6,19 +6,29 @@ use binrw::binrw;
 #[binrw]
 #[derive(Debug)]
 pub struct DateTimeStruct {
-    pub unk: [u8; 25],
+    pub unk: [u8; 8],
 }
 
 #[binrw]
 #[derive(Debug)]
 pub struct DALoadOptionStruct {
-    pub unk: [u8; 69], // Contains LoadType property
+    #[br(args { name: "LoadTypes", r#type: "IntProperty" })]
+    #[br(pad_after = 9)] // "none"
+    pub load_types: StructField,
 }
 
 #[binrw]
 #[derive(Debug)]
 pub struct SaveSlotInfoStruct {
-    pub unk: [u8; 17],
+    #[br(args { name: "Name", r#type: "StrProperty" })]
+    pub name: StructField,
+    #[br(args { name: "Timestamp", r#type: "StructProperty" })]
+    pub timestamp: StructField,
+    #[br(args { name: "Level", r#type: "NameProperty" })]
+    pub level: StructField,
+    #[br(args { name: "Players", r#type: "ArrayProperty" })]
+    #[br(pad_after = 9)] // "none"
+    pub players: StructField,
 }
 
 #[binrw]
