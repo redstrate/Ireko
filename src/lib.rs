@@ -114,9 +114,10 @@ pub struct TaggedSerialization {
 }
 
 #[binrw]
+#[brw(magic = 0x9e2a83c1u32)]
 #[derive(Debug)]
 pub struct CompressedSaveFile {
-    pub magic: u64,
+    #[br(pad_before = 4)]
     pub compressed_size: u64,
     pub a_compresed_size: u64,
     pub a_uncompresed_size: u64,
