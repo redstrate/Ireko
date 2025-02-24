@@ -1,25 +1,31 @@
-use crate::common::{read_bool_from, read_string_with_length, write_string_with_length};
+use crate::common::{
+    read_bool_from, read_string_with_length, write_bool_as, write_string_with_length,
+};
+use crate::guid::Guid;
 use crate::struct_property::Struct;
 use crate::structs::PrimaryAssetNameProperty;
-use binrw::helpers::until_exclusive;
 use binrw::{BinRead, BinResult, binrw};
-use crate::guid::Guid;
 
-// A struct without a name
-#[binrw]
-#[derive(Debug)]
-pub struct AnonymousStruct {
-    #[br(parse_with = until_exclusive(|entry: &PrimaryAssetNameProperty| entry.property_name == "None"))]
-    fields: Vec<PrimaryAssetNameProperty>,
+// parse until we can't parse no more. kind of a hack for how we run into the end of Persistent.Sav
+#[binrw::parser(reader, endian)]
+fn cc() -> BinResult<Vec<PrimaryAssetNameProperty>> {
+    let mut result = Vec::<PrimaryAssetNameProperty>::new();
+
+    loop {
+        if let Ok(str) = PrimaryAssetNameProperty::read_options(reader, endian, ()) {
+            result.push(str);
+        } else {
+            break;
+        }
+    }
+    Ok(result)
 }
 
 #[binrw]
 #[derive(Debug)]
 pub struct MapSubStructProperty {
-    #[br(temp)]
-    #[bw(ignore)]
-    pub unk_name_length: u32,
-    pub r#struct: Struct,
+    #[br(parse_with = cc)]
+    fields: Vec<PrimaryAssetNameProperty>,
 }
 
 #[binrw]
@@ -34,7 +40,12 @@ pub struct StructMaybeKey {
     #[bw(write_with = write_string_with_length)]
     pub unk_type: String,
 
-    #[br(pad_before = 4)] // type length
+    #[br(parse_with = read_string_with_length)]
+    #[bw(write_with = write_string_with_length)]
+    pub struct_name: String,
+
+    #[br(args { magic: &struct_name })]
+    #[brw(pad_before = 17)]
     pub r#struct: Struct,
 }
 
@@ -64,7 +75,7 @@ pub struct MapSubStrProperty {
 #[derive(Debug)]
 pub struct MapSubBoolProperty {
     #[br(map = read_bool_from::<u8>)]
-    #[bw(ignore)]
+    #[bw(map = write_bool_as::<u8>)]
     pub value: bool,
 }
 
@@ -129,6 +140,10 @@ pub enum MapKeyProperty {
     SomeID(Guid),
     #[br(pre_assert(*magic == KeyType::SomeID2))]
     SomeID2(Guid),
+    #[br(pre_assert(*magic == KeyType::ArrayStruct))]
+    ArrayStruct(StructMaybeKey),
+    #[br(pre_assert(*magic == KeyType::Unknown2))]
+    SomeID3(Guid),
 }
 
 #[binrw]
@@ -142,17 +157,24 @@ pub struct MapEntry {
     pub value: MabSubProperty,
 }
 
+// TODO: im worried that set/array/map actually share same of the same values...
 #[binrw]
 #[brw(repr = u32)]
 #[derive(Debug, PartialEq, Clone)]
 pub enum KeyType {
+    None = 0x0,
     String = 0x1,
+    SetStruct = 0x2,
+    SetStruct2 = 0x2f,
     GUID = 0x3,
     SomeID = 0x6,
     SomeID2 = 0x10,
     EnumAgain = 0x4,
     Enum = 0x7,
     StructMaybe = 0xC,
+    ArrayStruct = 0xA, // Only used in ArrayProperty
+    Unknown = 0x2E,    // AcquiredItemBoxIds in Persistent.sav
+    Unknown2 = 0x33,   // CharacterPersistentDataList in Persistent.sav
 }
 
 #[binrw::parser(reader, endian)]
@@ -198,9 +220,9 @@ pub struct MapProperty {
     pub value_name: String,
 
     #[brw(pad_before = 5)]
-    pub key_type: KeyType,
+    pub map_key_type: KeyType,
 
-    #[br(parse_with = custom_parser, args(size_in_bytes, &key_type, &value_name))]
+    #[br(parse_with = custom_parser, args(size_in_bytes, &map_key_type, &value_name))]
     pub entries: Vec<MapEntry>,
 }
 
@@ -251,15 +273,15 @@ mod tests {
         let property = MapProperty {
             key_name: "StrProperty".to_string(),
             value_name: "StrProperty".to_string(),
-            key_type: KeyType::String,
-            entries: vec![
-                MapEntry {
-                    key: MapKeyProperty::String(StringMapKey { value: "AR0XJGFWA6HNIQ1AAUJ9UR828".to_string() }),
-                    value: String(MapSubStrProperty {
-                        value: "NAME 1".to_string(),
-                    }),
-                }
-            ],
+            map_key_type: KeyType::String,
+            entries: vec![MapEntry {
+                key: MapKeyProperty::String(StringMapKey {
+                    value: "AR0XJGFWA6HNIQ1AAUJ9UR828".to_string(),
+                }),
+                value: String(MapSubStrProperty {
+                    value: "NAME 1".to_string(),
+                }),
+            }],
         };
 
         let mut buffer: Vec<u8> = Vec::new();

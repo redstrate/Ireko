@@ -23,15 +23,11 @@ mod tests {
         let decoded = BoolProperty::read_le(&mut cursor).unwrap();
         assert!(!decoded.value);
     }
-    
+
     #[test]
     fn write_false() {
-        let expected_data: [u8; 10] = [
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-        ];
-        let property = BoolProperty {
-            value: false
-        };
+        let expected_data: [u8; 10] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+        let property = BoolProperty { value: false };
 
         let mut buffer: Vec<u8> = Vec::new();
         {
@@ -41,7 +37,7 @@ mod tests {
 
         assert_eq!(expected_data, &buffer[..]);
     }
-    
+
     #[test]
     fn read_true() {
         let data = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00];
@@ -52,12 +48,8 @@ mod tests {
 
     #[test]
     fn write_true() {
-        let expected_data: [u8; 10] = [
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00
-        ];
-        let property = BoolProperty {
-            value: true
-        };
+        let expected_data: [u8; 10] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00];
+        let property = BoolProperty { value: true };
 
         let mut buffer: Vec<u8> = Vec::new();
         {

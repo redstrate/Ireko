@@ -30,9 +30,7 @@ mod tests {
         let expected_data: [u8; 13] = [
             0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         ];
-        let property = IntProperty {
-            value: 0
-        };
+        let property = IntProperty { value: 0 };
 
         let mut buffer: Vec<u8> = Vec::new();
         {
@@ -58,9 +56,7 @@ mod tests {
         let expected_data: [u8; 13] = [
             0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
         ];
-        let property = IntProperty {
-            value: 4
-        };
+        let property = IntProperty { value: 4 };
 
         let mut buffer: Vec<u8> = Vec::new();
         {

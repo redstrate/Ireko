@@ -30,9 +30,7 @@ mod tests {
         let expected_data: [u8; 13] = [
             0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x8c, 0x76, 0x9c, 0x45,
         ];
-        let property = FloatProperty {
-            value: 5006.8184
-        };
+        let property = FloatProperty { value: 5006.8184 };
 
         let mut buffer: Vec<u8> = Vec::new();
         {

@@ -1,16 +1,21 @@
 pub mod array_property;
 pub mod bool_property;
+mod build_data;
 mod common;
 pub mod float_property;
+mod guid;
 pub mod int_property;
+mod linear_color;
 pub mod map_property;
+mod name_property;
+mod primary_asset_id;
+mod primary_asset_type;
 pub mod set_property;
 pub mod str_property;
 pub mod struct_property;
 mod structs;
-mod guid;
 
-use binrw::helpers::{until, until_eof};
+use binrw::helpers::until_eof;
 
 use crate::array_property::ArrayProperty;
 use crate::bool_property::BoolProperty;
@@ -21,12 +26,12 @@ use crate::map_property::MapProperty;
 use crate::set_property::SetProperty;
 use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
-use binrw::binrw;
+use binrw::{BinRead, BinResult, binrw};
 
 // Used in ArrayProperty exclusively, but could be used instead of magic above
 #[binrw]
 #[derive(Debug)]
-#[br(import { magic: &str })]
+#[br(import { magic: &str, name: &str })]
 pub enum Property {
     #[br(pre_assert("NameProperty" == magic))]
     Name(StrProperty),
@@ -45,7 +50,10 @@ pub enum Property {
     #[br(pre_assert("MapProperty" == magic))]
     Map(MapProperty),
     #[br(pre_assert("SetProperty" == magic))]
-    Set(SetProperty),
+    Set {
+        #[br(args(name))]
+        value: SetProperty,
+    },
 }
 
 #[binrw]
@@ -60,15 +68,31 @@ pub struct Entry {
     #[br(if(name != "None"))]
     pub type_name: String,
 
-    #[br(if(name != "None"), args { magic: &type_name })]
+    #[br(if(name != "None"), args { magic: &type_name, name: &name })]
     pub r#type: Option<Property>,
+}
+
+#[binrw::parser(reader, endian)]
+fn custom_tagged_object_parser(size_in_bytes: u32) -> BinResult<Vec<Entry>> {
+    let mut result = Vec::<Entry>::new();
+
+    let mut current = reader.stream_position()?;
+    let end = current + size_in_bytes as u64;
+
+    while current < end {
+        result.push(Entry::read_options(reader, endian, ())?);
+        current = reader.stream_position()?;
+    }
+    Ok(result)
 }
 
 #[binrw]
 #[derive(Debug)]
 pub struct TaggedObject {
     pub size_in_bytes: u32,
-    #[br(parse_with = until(|entry: &Entry| entry.name == "None"))]
+    //#[br(parse_with = custom_tagged_object_parser, args(size_in_bytes))]
+    //#[br(parse_with = until(|entry: &Entry| entry.name == "None"))]
+    #[br(parse_with = until_eof)]
     pub entries: Vec<Entry>,
 }
 

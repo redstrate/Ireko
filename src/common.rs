@@ -1,16 +1,12 @@
-use binrw::{BinRead, BinWrite};
 use binrw::BinResult;
+use binrw::{BinRead, BinWrite};
 
 pub(crate) fn read_bool_from<T: From<u8> + PartialEq>(x: T) -> bool {
     x == T::from(1u8)
 }
 
 pub(crate) fn write_bool_as<T: From<u8>>(x: &bool) -> T {
-    if *x {
-        T::from(1u8)
-    } else {
-        T::from(0u8)
-    }
+    if *x { T::from(1u8) } else { T::from(0u8) }
 }
 
 #[binrw::parser(reader, endian)]
@@ -51,7 +47,6 @@ pub(crate) fn write_string_with_length(string: &String) -> BinResult<()> {
     null_terminator.write_le(writer)?;
     Ok(())
 }
-
 
 #[cfg(test)]
 mod tests {
