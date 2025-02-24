@@ -15,22 +15,21 @@ pub mod str_property;
 pub mod struct_property;
 mod structs;
 
+use binrw::helpers::until_eof;
 use std::fs::write;
 use std::io::{Cursor, Read};
-use binrw::helpers::until_eof;
 
-use crate::array_property::{ArrayEntry, ArrayKeyData, ArrayProperty};
+use crate::array_property::ArrayProperty;
 use crate::bool_property::BoolProperty;
 use crate::common::{read_string_with_length, write_string_with_length};
 use crate::float_property::FloatProperty;
 use crate::int_property::IntProperty;
-use crate::map_property::{KeyType, MapProperty};
+use crate::map_property::MapProperty;
 use crate::set_property::SetProperty;
 use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
 use binrw::{BinRead, BinResult, binrw};
 use flate2::bufread::ZlibDecoder;
-use flate2::Decompress;
 
 // Used in ArrayProperty exclusively, but could be used instead of magic above
 #[binrw]
@@ -69,7 +68,6 @@ pub struct Entry {
 
     #[br(parse_with = read_string_with_length)]
     #[bw(write_with = write_string_with_length)]
-    // TODO: remove the "None" check since that's working around missing "None" padding at the end of structs and elsewhere
     #[br(if(name != "None"))]
     pub type_name: String,
 
@@ -82,10 +80,32 @@ fn custom_tagged_object_parser(size_in_bytes: u32) -> BinResult<Vec<Entry>> {
     let mut result = Vec::<Entry>::new();
 
     let mut current = reader.stream_position()?;
+    let end = current + size_in_bytes as u64 - 4; // for the size bits
+
+    while current < end {
+        let entry = Entry::read_options(reader, endian, ())?;
+        if entry.name == "None" {
+            break;
+        }
+        result.push(entry);
+        current = reader.stream_position()?;
+    }
+    Ok(result)
+}
+
+#[binrw::parser(reader, endian)]
+fn custom_parser(size_in_bytes: u32) -> BinResult<Vec<TaggedObject>> {
+    let mut result = Vec::<TaggedObject>::new();
+
+    let mut current = reader.stream_position()?;
     let end = current + size_in_bytes as u64;
 
     while current < end {
-        result.push(Entry::read_options(reader, endian, ())?);
+        let obj = TaggedObject::read_options(reader, endian, ())?;
+        if obj.size_in_bytes == 0 {
+            break;
+        }
+        result.push(obj);
         current = reader.stream_position()?;
     }
     Ok(result)
@@ -95,16 +115,13 @@ fn custom_tagged_object_parser(size_in_bytes: u32) -> BinResult<Vec<Entry>> {
 #[derive(Debug)]
 pub struct TaggedObject {
     pub size_in_bytes: u32,
-    //#[br(parse_with = custom_tagged_object_parser, args(size_in_bytes))]
-    //#[br(parse_with = until(|entry: &Entry| entry.name == "None"))]
-    #[br(parse_with = until_eof)]
+    #[br(parse_with = custom_tagged_object_parser, args(size_in_bytes))]
     pub entries: Vec<Entry>,
 }
 
 impl TaggedObject {
     pub fn entry(&self, key: &str) -> Option<&Entry> {
         let entries: Vec<&Entry> = self.entries.iter().filter(|e| e.name == key).collect();
-
         entries.first().copied()
     }
 }
@@ -112,17 +129,13 @@ impl TaggedObject {
 #[binrw]
 #[derive(Debug)]
 pub struct TaggedSerialization {
-    // Excluding the first four bytes, which is this
     pub size_in_bytes: u32,
-    #[br(parse_with = until_eof)]
+    #[br(parse_with = custom_parser, args(size_in_bytes))]
     pub objs: Vec<TaggedObject>,
 }
 
 #[binrw::parser(reader, endian)]
-fn read_compressed_data(
-    compressed_size: u64,
-    uncompressed_size: u64,
-) -> BinResult<Vec<u8>> {
+fn read_compressed_data(compressed_size: u64, uncompressed_size: u64) -> BinResult<Vec<u8>> {
     let mut compressed_data = vec![0; compressed_size as usize];
     reader.read_exact(&mut compressed_data)?;
 
@@ -136,9 +149,7 @@ fn read_compressed_data(
 
 // TODO: there's no point in using a parser, we should just use map()
 #[binrw::parser(reader, endian)]
-fn read_tagged_data(
-    data_blocks: &Vec<CompressedBlock>
-) -> BinResult<TaggedSerialization> {
+fn read_tagged_data(data_blocks: &Vec<CompressedBlock>) -> BinResult<TaggedSerialization> {
     let data_vecs: Vec<Vec<u8>> = data_blocks.iter().map(|x| x.data.clone()).collect();
     let combined_data = data_vecs.concat();
     write("output.bin", &combined_data);
