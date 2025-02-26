@@ -30,7 +30,7 @@ use crate::name_property::NameProperty;
 use crate::set_property::SetProperty;
 use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
-use binrw::{BinRead, BinResult, binrw};
+use binrw::{BinRead, BinResult, binrw, BinWrite};
 use flate2::bufread::ZlibDecoder;
 
 // Used in ArrayProperty exclusively, but could be used instead of magic above
@@ -95,6 +95,21 @@ fn custom_tagged_object_parser(size_in_bytes: u32) -> BinResult<Vec<Entry>> {
     Ok(result)
 }
 
+#[binrw::writer(writer, endian)]
+fn custom_tagged_object_writer(entries: &Vec<Entry>) -> BinResult<()> {
+    for entry in entries {
+        entry.write_options(writer, endian, ())?
+    }
+    // Write "none" entry at the end
+    let none_entry = Entry {
+        name: "None".to_string(),
+        type_name: "".to_string(),
+        r#type: None,
+    };
+    none_entry.write_options(writer, endian, ())?;
+    Ok(())
+}
+
 #[binrw::parser(reader, endian)]
 fn custom_parser(size_in_bytes: u32) -> BinResult<Vec<TaggedObject>> {
     let mut result = Vec::<TaggedObject>::new();
@@ -118,6 +133,7 @@ fn custom_parser(size_in_bytes: u32) -> BinResult<Vec<TaggedObject>> {
 pub struct TaggedObject {
     pub size_in_bytes: u32,
     #[br(parse_with = custom_tagged_object_parser, args(size_in_bytes))]
+    #[bw(write_with = custom_tagged_object_writer)]
     pub entries: Vec<Entry>,
 }
 
