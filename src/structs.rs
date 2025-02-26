@@ -44,12 +44,6 @@ pub struct SaveSlotInfoStruct {
     pub players: ArrayProperty,
 }
 
-#[binrw]
-#[derive(Debug)]
-pub struct DACharacterCommonStatusStruct {
-    pub unk: [u8; 17],
-}
-
 // TODO: replace all usage of this with StructField
 #[binrw]
 #[derive(Debug)]

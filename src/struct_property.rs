@@ -5,7 +5,7 @@ use crate::linear_color::LinearColorStruct;
 use crate::primary_asset_id::PrimaryAssetIdStruct;
 use crate::primary_asset_type::PrimaryAssetTypeStruct;
 use crate::structs::{
-    DAAssembleIdDataStruct, DACharacterCommonStatusStruct, DACustomizeAssetIdDataStruct,
+    DAAssembleIdDataStruct, DACustomizeAssetIdDataStruct,
     DAHumanoidColoringDataStruct, DAHumanoidFigureData, DALoadOptionStruct,
     DAMachineColoringDataStruct, DAModuleColorStruct, DAModuleItemDataStruct, DATriggerDataStruct,
     DATuningDataStruct, DATuningPointData, DateTimeStruct, QuatStruct, SaveSlotInfoStruct,
@@ -23,8 +23,6 @@ pub enum Struct {
     DALoadOption(DALoadOptionStruct),
     #[br(pre_assert(magic == "SaveSlotInfo"))]
     SaveSlotInfo(SaveSlotInfoStruct),
-    #[br(pre_assert(magic == "DACharacterCommonStatus"))]
-    DACharacterCommonStatus(DACharacterCommonStatusStruct),
     #[br(pre_assert(magic == "PrimaryAssetType"))]
     PrimaryAssetType(PrimaryAssetTypeStruct),
     #[br(pre_assert(magic == "PrimaryAssetId"))]
