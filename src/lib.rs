@@ -14,6 +14,7 @@ pub mod set_property;
 pub mod str_property;
 pub mod struct_property;
 mod structs;
+mod enum_property;
 
 use binrw::helpers::until_eof;
 use std::fs::write;

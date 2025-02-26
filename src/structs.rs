@@ -14,6 +14,7 @@ use crate::primary_asset_type::PrimaryAssetTypeStruct;
 use crate::str_property::StrProperty;
 use binrw::{BinRead, BinResult, binrw};
 use std::fmt::Debug;
+use crate::enum_property::EnumProperty;
 
 #[binrw]
 #[derive(Debug)]
@@ -207,10 +208,17 @@ pub struct DAModuleColorStruct {
     pub glow: LinearColorStruct,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DATriggerDataStruct {
-    pub unk: [u8; 319], // trigger weapon config in game
+    #[paramacro::serialized_field = "A"]
+    pub a: EnumProperty,
+
+    #[paramacro::serialized_field = "B"]
+    pub b: EnumProperty,
+
+    #[paramacro::serialized_field = "C"]
+    pub c: EnumProperty,
 }
 
 #[paramacro::serialized_struct]
