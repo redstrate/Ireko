@@ -3,7 +3,7 @@
 Library for reading save files from [Dolls Nest](https://store.steampowered.com/app/1839430/Dolls_Nest/). Only the demo
 is supported because that's what is available at the time of writing.
 
-**The parser is not yet complete, and can only dump parts of the structured data. The code is also generally terrible because I'm still exploring the format.**
+**The parser is almost now complete (save for a few structs like DateTime), and write support is in progress.**
 
 ## Usage
 
