@@ -25,6 +25,7 @@ use crate::common::{read_string_with_length, write_string_with_length};
 use crate::float_property::FloatProperty;
 use crate::int_property::IntProperty;
 use crate::map_property::MapProperty;
+use crate::name_property::NameProperty;
 use crate::set_property::SetProperty;
 use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
@@ -37,7 +38,7 @@ use flate2::bufread::ZlibDecoder;
 #[br(import { magic: &str, name: &str })]
 pub enum Property {
     #[br(pre_assert("NameProperty" == magic))]
-    Name(StrProperty),
+    Name(NameProperty),
     #[br(pre_assert("StructProperty" == magic))]
     Struct(StructProperty),
     #[br(pre_assert("FloatProperty" == magic))]

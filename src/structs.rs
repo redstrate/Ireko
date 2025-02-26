@@ -1,7 +1,19 @@
 use crate::Property;
+use crate::array_property::ArrayProperty;
+use crate::bool_property::BoolProperty;
 use crate::build_data::DABuildDataStruct;
 use crate::common::{read_string_with_length, write_string_with_length};
-use binrw::binrw;
+use crate::float_property::FloatProperty;
+use crate::guid::Guid;
+use crate::int_property::IntProperty;
+use crate::linear_color::LinearColorStruct;
+use crate::map_property::MapProperty;
+use crate::name_property::NameProperty;
+use crate::primary_asset_id::PrimaryAssetIdStruct;
+use crate::primary_asset_type::PrimaryAssetTypeStruct;
+use crate::str_property::StrProperty;
+use binrw::{BinRead, BinResult, binrw};
+use std::fmt::Debug;
 
 #[binrw]
 #[derive(Debug)]
@@ -9,26 +21,27 @@ pub struct DateTimeStruct {
     pub unk: [u8; 8],
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DALoadOptionStruct {
-    #[br(args { name: "LoadTypes", r#type: "IntProperty" })]
-    #[br(pad_after = 9)] // "none"
-    pub load_types: StructField,
+    #[paramacro::serialized_field = "LoadTypes"]
+    pub load_types: IntProperty,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct SaveSlotInfoStruct {
-    #[br(args { name: "Name", r#type: "StrProperty" })]
-    pub name: StructField,
-    #[br(args { name: "Timestamp", r#type: "StructProperty" })]
-    pub timestamp: StructField,
-    #[br(args { name: "Level", r#type: "NameProperty" })]
-    pub level: StructField,
-    #[br(args { name: "Players", r#type: "ArrayProperty" })]
-    #[br(pad_after = 9)] // "none"
-    pub players: StructField,
+    #[paramacro::serialized_field = "Name"]
+    pub name: StrProperty,
+
+    #[paramacro::serialized_field = "Timestamp"]
+    pub timestamp: DateTimeStruct,
+
+    #[paramacro::serialized_field = "Level"]
+    pub level: NameProperty,
+
+    #[paramacro::serialized_field = "Players"]
+    pub players: ArrayProperty,
 }
 
 #[binrw]
@@ -75,74 +88,129 @@ pub struct StructField {
     pub key: Option<Box<Property>>,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DAModuleItemDataStruct {
-    #[br(pad_after = 9)] // none
-    pub module_level: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "ModuleLevel"]
+    pub module_level: IntProperty,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DAAssembleIdDataStruct {
-    pub hanger: PrimaryAssetNameProperty,
-    pub headset: PrimaryAssetNameProperty,
-    pub mobility: PrimaryAssetNameProperty,
-    pub thruster: PrimaryAssetNameProperty,
-    pub utility: PrimaryAssetNameProperty,
-    pub primary_front_weapon: PrimaryAssetNameProperty,
-    pub secondary_front_weapon: PrimaryAssetNameProperty,
-    pub left_rear_weapon: PrimaryAssetNameProperty,
-    pub right_rear_weapon: PrimaryAssetNameProperty,
-    // has none at the end
-    #[br(pad_after = 9)]
-    pub coloring_data: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "Hanger"]
+    pub hanger: Guid,
+
+    #[paramacro::serialized_field = "Headset"]
+    pub headset: Guid,
+
+    #[paramacro::serialized_field = "Mobility"]
+    pub mobility: Guid,
+
+    #[paramacro::serialized_field = "Thruster"]
+    pub thruster: Guid,
+
+    #[paramacro::serialized_field = "Utility"]
+    pub utility: Guid,
+
+    #[paramacro::serialized_field = "PrimaryFrontWeapon"]
+    pub primary_front_weapon: Guid,
+
+    #[paramacro::serialized_field = "SecondaryFrontWeapon"]
+    pub secondary_front_weapon: Guid,
+
+    #[paramacro::serialized_field = "LeftRearWeapon"]
+    pub left_rear_weapon: Guid,
+
+    #[paramacro::serialized_field = "RightRearWeapon"]
+    pub right_rear_weapon: Guid,
+
+    #[paramacro::serialized_field = "ColoringData"]
+    pub coloring_data: DAMachineColoringDataStruct,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DAMachineColoringDataStruct {
-    pub hanger: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "Hanger"]
+    pub hanger: DAModuleColorStruct,
 
-    pub headset: PrimaryAssetNameProperty,
-    pub mobility: PrimaryAssetNameProperty,
-    pub thruster: PrimaryAssetNameProperty,
-    pub utility: PrimaryAssetNameProperty,
-    pub primary_front_weapon: PrimaryAssetNameProperty,
-    pub secondary_front_weapon: PrimaryAssetNameProperty,
-    pub left_rear_weapon: PrimaryAssetNameProperty,
-    // has none at the end
-    #[br(pad_after = 9)]
-    pub right_rear_weapon: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "Headset"]
+    pub headset: DAModuleColorStruct,
+
+    #[paramacro::serialized_field = "Mobility"]
+    pub mobility: DAModuleColorStruct,
+
+    #[paramacro::serialized_field = "Thruster"]
+    pub thruster: DAModuleColorStruct,
+
+    #[paramacro::serialized_field = "Utility"]
+    pub utility: DAModuleColorStruct,
+
+    #[paramacro::serialized_field = "PrimaryFrontWeapon"]
+    pub primary_front_weapon: DAModuleColorStruct,
+
+    #[paramacro::serialized_field = "SecondaryFrontWeapon"]
+    pub secondary_front_weapon: DAModuleColorStruct,
+
+    #[paramacro::serialized_field = "LeftRearWeapon"]
+    pub left_rear_weapon: DAModuleColorStruct,
+
+    #[paramacro::serialized_field = "RightRearWeapon"]
+    pub right_rear_weapon: DAModuleColorStruct,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DAHumanoidColoringDataStruct {
-    pub skin: PrimaryAssetNameProperty,
-    pub hair_base: PrimaryAssetNameProperty,
-    pub hair_gradation: PrimaryAssetNameProperty,
-    pub hair_highlight: PrimaryAssetNameProperty,
-    pub head_option: PrimaryAssetNameProperty,
-    pub eye_l: PrimaryAssetNameProperty,
-    pub eye_r: PrimaryAssetNameProperty,
-    pub body_main: PrimaryAssetNameProperty,
-    pub body_sub1: PrimaryAssetNameProperty,
-    pub body_sub2: PrimaryAssetNameProperty,
-    // has none at the end
-    #[br(pad_after = 9)]
-    pub body_sub3: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "Skin"]
+    pub skin: LinearColorStruct,
+
+    #[paramacro::serialized_field = "HairBase"]
+    pub hair_base: LinearColorStruct,
+
+    #[paramacro::serialized_field = "HairGradation"]
+    pub hair_gradation: LinearColorStruct,
+
+    #[paramacro::serialized_field = "HairHighlight"]
+    pub hair_highlight: LinearColorStruct,
+
+    #[paramacro::serialized_field = "HeadOption"]
+    pub head_option: LinearColorStruct,
+
+    #[paramacro::serialized_field = "EyeL"]
+    pub eye_l: LinearColorStruct,
+
+    #[paramacro::serialized_field = "EyeR"]
+    pub eye_r: LinearColorStruct,
+
+    #[paramacro::serialized_field = "BodyMain"]
+    pub body_main: LinearColorStruct,
+
+    #[paramacro::serialized_field = "BodySub1"]
+    pub body_sub1: LinearColorStruct,
+
+    #[paramacro::serialized_field = "BodySub2"]
+    pub body_sub2: LinearColorStruct,
+
+    #[paramacro::serialized_field = "BodySub3"]
+    pub body_sub3: LinearColorStruct,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DAModuleColorStruct {
-    pub main: PrimaryAssetNameProperty,
-    pub sub: PrimaryAssetNameProperty,
-    pub inner: PrimaryAssetNameProperty,
-    // has none at the end
-    #[br(pad_after = 9)]
-    pub glow: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "Main"]
+    pub main: LinearColorStruct,
+
+    #[paramacro::serialized_field = "Sub"]
+    pub sub: LinearColorStruct,
+
+    #[paramacro::serialized_field = "Inner"]
+    pub inner: LinearColorStruct,
+
+    #[paramacro::serialized_field = "Glow"]
+    pub glow: LinearColorStruct,
 }
 
 #[binrw]
@@ -151,50 +219,61 @@ pub struct DATriggerDataStruct {
     pub unk: [u8; 319], // trigger weapon config in game
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DACustomizeAssetIdDataStruct {
-    pub body: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "Body"]
+    pub body: PrimaryAssetIdStruct,
 
-    pub face: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "Face"]
+    pub face: PrimaryAssetIdStruct,
 
-    pub front_hair: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "FrontHair"]
+    pub front_hair: PrimaryAssetIdStruct,
 
-    pub back_hair: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "BackHair"]
+    pub back_hair: PrimaryAssetIdStruct,
 
-    pub coloring_data: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "ColoringData"]
+    pub coloring_data: DAHumanoidColoringDataStruct,
 
-    pub figure_data: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "FigureData"]
+    pub figure_data: DAHumanoidFigureData,
 
-    pub inverse_face_mesh: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "bInverseFaceMesh"]
+    pub inverse_face_mesh: BoolProperty,
 
-    pub inverse_front_hair_mesh: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "bInverseFrontHairMesh"]
+    pub inverse_front_hair_mesh: BoolProperty,
 
-    // has none at the end
-    #[brw(pad_after = 9)]
-    pub inverse_back_hair_mesh: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "bInverseBackHairMesh"]
+    pub inverse_back_hair_mesh: BoolProperty,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DAHumanoidFigureData {
-    pub bust_up: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "BustUp"]
+    pub bust_up: FloatProperty,
 
-    pub fat_up: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "FatUp"]
+    pub fat_up: FloatProperty,
 
-    pub arm_up: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "ArmUp"]
+    pub arm_up: FloatProperty,
 
-    pub leg_up: PrimaryAssetNameProperty,
-    // has none at the end
-    #[brw(pad_after = 9)]
-    pub waist_up: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "LegUp"]
+    pub leg_up: FloatProperty,
+
+    #[paramacro::serialized_field = "WaistUp"]
+    pub waist_up: FloatProperty,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DATuningDataStruct {
-    #[brw(pad_after = 9)]
-    pub granted_tuning_point_list: PrimaryAssetNameProperty,
+    #[paramacro::serialized_field = "GrantedTuningPointList"]
+    pub granted_tuning_point_list: MapProperty,
 }
 
 #[binrw]
@@ -203,26 +282,27 @@ pub struct SavedBuildData {
     pub build_data: DABuildDataStruct,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DATuningPointData {
-    #[br(args { name: "TuningPoint", r#type: "IntProperty" })]
-    tuning_point: StructField,
-    #[br(args { name: "MaxTuningPoint", r#type: "IntProperty" })]
-    #[brw(pad_after = 9)] // none
-    max_tuning_point: StructField,
+    #[paramacro::serialized_field = "TuningPoint"]
+    tuning_point: IntProperty,
+
+    #[paramacro::serialized_field = "MaxTuningPoint"]
+    max_tuning_point: IntProperty,
 }
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct TransformStruct {
-    #[br(args { name: "Rotation", r#type: "StructProperty" })]
-    rotation: StructField,
-    #[br(args { name: "Translation", r#type: "StructProperty" })]
-    translation: StructField,
-    #[br(args { name: "Scale3D", r#type: "StructProperty" })]
-    #[brw(pad_after = 9)] // none
-    scale: StructField,
+    #[paramacro::serialized_field = "Rotation"]
+    rotation: QuatStruct,
+
+    #[paramacro::serialized_field = "Translation"]
+    translation: VectorStruct,
+
+    #[paramacro::serialized_field = "Scale3D"]
+    scale: VectorStruct,
 }
 
 #[binrw]
@@ -241,4 +321,46 @@ pub struct VectorStruct {
     pub x: f32,
     pub y: f32,
     pub z: f32,
+}
+
+#[binrw]
+#[derive(Debug)]
+pub struct StructFieldPrelude {
+    #[br(parse_with = read_string_with_length)]
+    #[bw(write_with = write_string_with_length)]
+    pub property_name: String,
+
+    #[br(parse_with = read_string_with_length)]
+    #[bw(write_with = write_string_with_length)]
+    pub type_name: String,
+}
+
+#[binrw]
+#[derive(Debug)]
+pub struct StructPrelude {
+    pub unk: u32,
+    #[brw(pad_before = 4)]
+    #[br(parse_with = read_string_with_length)]
+    #[bw(write_with = write_string_with_length)]
+    #[br(pad_after = 17)]
+    pub struct_name: String,
+}
+
+#[binrw::parser(reader, endian)]
+pub(crate) fn read_struct_field<T: BinRead<Args<'static> = ()> + Debug>(
+    name: &str,
+) -> BinResult<T> {
+    let prelude = StructFieldPrelude::read_le(reader)?;
+    if prelude.property_name != name {
+        panic!(
+            "Property name doesn't match! Is supposed to be {} but is actually {}",
+            name, prelude.property_name
+        );
+    }
+    println!("{:#?}", prelude);
+    if prelude.type_name == "StructProperty" {
+        println!("{:#?}", StructPrelude::read_le(reader)?);
+    }
+    let val = T::read_options(reader, endian, ())?;
+    Ok(val)
 }

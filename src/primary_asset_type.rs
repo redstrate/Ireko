@@ -1,6 +1,7 @@
 use crate::structs::StructField;
 use binrw::binrw;
 
+// TODO: im pretty sure everything about this + PrimaryAssetId is wrong. i think primary_asset_name needs to belong in PrimaryAssetId
 #[binrw]
 #[derive(Debug)]
 pub struct PrimaryAssetTypeStruct {

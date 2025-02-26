@@ -1,24 +1,28 @@
-use crate::structs::StructField;
-use binrw::binrw;
+use crate::common::{read_string_with_length, write_string_with_length};
+use crate::str_property::StrProperty;
+use crate::structs::{
+    DAAssembleIdDataStruct, DACustomizeAssetIdDataStruct, DATriggerDataStruct, DATuningDataStruct,
+};
+use binrw::{binrw};
+use std::fmt::Debug;
 
-#[binrw]
+#[paramacro::serialized_struct]
 #[derive(Debug)]
 pub struct DABuildDataStruct {
-    #[br(args { name: "Name", r#type: "StrProperty" })]
-    pub name: StructField,
+    #[paramacro::serialized_field = "Name"]
+    pub name: StrProperty,
 
-    #[br(args { name: "Assemble", r#type: "StructProperty" })]
-    pub assemble: StructField,
+    #[paramacro::serialized_field = "Assemble"]
+    pub assemble: DAAssembleIdDataStruct,
 
-    #[br(args { name: "Trigger", r#type: "StructProperty" })]
-    pub trigger: StructField,
+    #[paramacro::serialized_field = "Trigger"]
+    pub trigger: DATriggerDataStruct,
 
-    #[br(args { name: "Customize", r#type: "StructProperty" })]
-    pub customize: StructField,
+    #[paramacro::serialized_field = "Customize"]
+    pub customize: DACustomizeAssetIdDataStruct,
 
-    #[br(args { name: "Tuning", r#type: "StructProperty" })]
-    #[brw(pad_after = 9)]
-    pub tuning: StructField,
+    #[paramacro::serialized_field = "Tuning"]
+    pub tuning: DATuningDataStruct,
 }
 
 #[cfg(test)]
