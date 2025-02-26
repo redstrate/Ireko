@@ -45,8 +45,8 @@ fn roundtrip_slot() {
     let tagged_object = &local_profile.objs[0];
     assert_eq!(tagged_object.size_in_bytes, 900);
 
-    tagged_object.entry("Players").unwrap();
-    tagged_object.entry("Level").unwrap();
+    tagged_object.entry("PlayTime").unwrap();
+    tagged_object.entry("SlotInfo").unwrap();
 
     // TODO: check values
 
