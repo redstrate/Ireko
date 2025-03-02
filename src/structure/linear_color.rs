@@ -2,12 +2,19 @@ use binrw::binrw;
 
 use crate::property::PropertyBase;
 
+/// A linear, 32-bit/component floating point RGBA color.
+///
+/// See [the Unreal Engine documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Core/Math/FLinearColor?application_version=4.27).
 #[binrw]
 #[derive(Debug)]
 pub struct LinearColorStruct {
+    /// Red component.
     pub r: f32,
+    /// Green component.
     pub g: f32,
+    /// Blue component.
     pub b: f32,
+    /// Alpha component.
     pub a: f32,
 }
 
