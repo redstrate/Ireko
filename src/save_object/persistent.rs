@@ -2,9 +2,8 @@ use binrw::binrw;
 
 use crate::{
     property::{
-        array_property::ArrayProperty, bool_property::BoolProperty, int_property::IntProperty,
-        map_property::MapProperty, name_property::NameProperty, set_property::SetProperty,
-        str_property::StrProperty,
+        BoolProperty, IntProperty, NameProperty, StrProperty, array_property::ArrayProperty,
+        map_property::MapProperty, set_property::SetProperty,
     },
     structure::{
         build_data::DABuildDataStruct, da_tuning_point_data::DATuningPointData,

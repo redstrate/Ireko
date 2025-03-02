@@ -2,6 +2,7 @@ use binrw::binrw;
 
 use super::PropertyBase;
 
+/// A float.
 #[binrw]
 #[derive(Debug)]
 pub struct FloatProperty {

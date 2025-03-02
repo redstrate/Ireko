@@ -1,4 +1,4 @@
-use crate::property::float_property::FloatProperty;
+use crate::property::FloatProperty;
 
 #[paramacro::serialized_struct("DAHumanoidFigureData")]
 #[derive(Debug)]

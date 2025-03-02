@@ -3,6 +3,7 @@ use binrw::binrw;
 
 use super::PropertyBase;
 
+/// A enum.
 #[binrw]
 #[derive(Debug)]
 pub struct EnumProperty {

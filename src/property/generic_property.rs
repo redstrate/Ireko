@@ -5,6 +5,7 @@ use crate::{
     save_object::generic::Property,
 };
 
+/// A generic property that has no name or type requirements.
 #[binrw]
 #[derive(Debug)]
 pub struct GenericProperty {

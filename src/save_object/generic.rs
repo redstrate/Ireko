@@ -3,9 +3,8 @@ use binrw::{BinRead, BinResult, BinWrite, binrw};
 use crate::{
     common::{read_string_with_length, write_string_with_length},
     property::{
-        array_property::ArrayProperty, bool_property::BoolProperty, float_property::FloatProperty,
-        int_property::IntProperty, map_property::MapProperty, name_property::NameProperty,
-        set_property::SetProperty, str_property::StrProperty, struct_property::StructProperty,
+        BoolProperty, FloatProperty, IntProperty, NameProperty, StrProperty, StructProperty,
+        array_property::ArrayProperty, map_property::MapProperty, set_property::SetProperty,
     },
 };
 

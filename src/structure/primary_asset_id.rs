@@ -1,4 +1,4 @@
-use crate::property::name_property::NameProperty;
+use crate::property::NameProperty;
 
 use super::primary_asset_type::PrimaryAssetTypeStruct;
 

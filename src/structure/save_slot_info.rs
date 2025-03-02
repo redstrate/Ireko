@@ -1,6 +1,4 @@
-use crate::property::{
-    array_property::ArrayProperty, name_property::NameProperty, str_property::StrProperty,
-};
+use crate::property::{NameProperty, StrProperty, array_property::ArrayProperty};
 
 use super::datetime::DateTimeStruct;
 

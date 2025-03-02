@@ -1,4 +1,4 @@
-use crate::property::name_property::NameProperty;
+use crate::property::NameProperty;
 
 #[paramacro::serialized_struct("PrimaryAssetType")]
 #[derive(Debug)]

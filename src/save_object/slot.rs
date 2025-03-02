@@ -1,8 +1,5 @@
 use crate::{
-    property::{
-        bool_property::BoolProperty, float_property::FloatProperty, int_property::IntProperty,
-        name_property::NameProperty, str_property::StrProperty,
-    },
+    property::{BoolProperty, FloatProperty, IntProperty, NameProperty, StrProperty},
     structure::{
         da_load_option::DALoadOptionStruct, datetime::DateTimeStruct,
         save_slot_info::SaveSlotInfoStruct,

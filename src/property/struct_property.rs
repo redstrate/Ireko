@@ -4,6 +4,7 @@ use crate::{
 };
 use binrw::binrw;
 
+/// A structure.
 #[binrw]
 #[derive(Debug)]
 pub struct StructProperty {

@@ -2,8 +2,7 @@ use crate::common::{read_string_with_length, write_string_with_length};
 use binrw::{BinRead, BinResult, binrw};
 
 use super::{
-    PropertyBase,
-    generic_property::GenericProperty,
+    GenericProperty, PropertyBase,
     map_property::{KeyType, MapSubStrProperty},
 };
 
@@ -73,6 +72,7 @@ fn custom_parser(
     Ok(result)
 }
 
+/// A set.
 #[binrw]
 #[derive(Debug)]
 pub struct SetProperty {

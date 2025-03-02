@@ -2,6 +2,7 @@ use binrw::binrw;
 
 use super::PropertyBase;
 
+/// A integer.
 #[binrw]
 #[derive(Debug)]
 pub struct IntProperty {

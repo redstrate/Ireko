@@ -1,7 +1,4 @@
-use crate::property::{
-    bool_property::BoolProperty, int_property::IntProperty, map_property::MapProperty,
-    str_property::StrProperty,
-};
+use crate::property::{BoolProperty, IntProperty, StrProperty, map_property::MapProperty};
 
 #[paramacro::serialized_struct("Transform")]
 #[derive(Debug)]

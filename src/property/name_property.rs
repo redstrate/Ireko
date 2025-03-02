@@ -3,6 +3,7 @@ use binrw::binrw;
 
 use super::PropertyBase;
 
+/// A name.
 #[binrw]
 #[derive(Debug)]
 pub struct NameProperty {

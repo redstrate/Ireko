@@ -3,6 +3,7 @@ use binrw::binrw;
 
 use super::PropertyBase;
 
+/// A boolean.
 #[binrw]
 #[derive(Debug)]
 pub struct BoolProperty {

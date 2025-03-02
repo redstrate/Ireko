@@ -1,4 +1,4 @@
-use crate::property::enum_property::EnumProperty;
+use crate::property::EnumProperty;
 
 #[paramacro::serialized_struct("DATriggerData")]
 #[derive(Debug)]

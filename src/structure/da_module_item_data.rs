@@ -1,4 +1,4 @@
-use crate::property::int_property::IntProperty;
+use crate::property::IntProperty;
 
 #[paramacro::serialized_struct("DAModuleItemData")]
 #[derive(Debug)]

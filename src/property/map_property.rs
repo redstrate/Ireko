@@ -5,7 +5,7 @@ use crate::{
     structure::{Struct, guid::Guid},
 };
 
-use super::{PropertyBase, generic_property::GenericProperty};
+use super::{GenericProperty, PropertyBase};
 
 // parse until we can't parse no more. kind of a hack for how we run into the end of Persistent.Sav
 #[binrw::parser(reader, endian)]
@@ -270,6 +270,7 @@ fn calc_entry_size_in_bytes(prop: &MapProperty) -> u32 {
     size
 }
 
+/// A map.
 #[binrw]
 #[derive(Debug)]
 pub struct MapProperty {

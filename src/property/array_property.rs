@@ -141,6 +141,7 @@ fn calc_key_data_size_in_bytes(key_data: &ArrayKeyData) -> u32 {
     }
 }
 
+/// An array.
 #[binrw]
 #[derive(Debug)]
 pub struct ArrayProperty {

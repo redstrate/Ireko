@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use crate::property::str_property::StrProperty;
+use crate::property::StrProperty;
 
 use super::{
     da_assemble_id_data::DAAssembleIdDataStruct,

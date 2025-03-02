@@ -1,4 +1,4 @@
-use crate::property::bool_property::BoolProperty;
+use crate::property::BoolProperty;
 
 use super::{
     da_humanoid_coloring_data::DAHumanoidColoringDataStruct,
