@@ -2,7 +2,7 @@ use crate::common::{
     read_bool_from, read_string_with_length, write_bool_as, write_string_with_length,
 };
 use crate::guid::Guid;
-use crate::struct_property::{Struct, calc_size_in_bytes};
+use crate::struct_property::Struct;
 use crate::structs::{GenericProperty, PropertyBase};
 use binrw::{BinRead, BinResult, binrw};
 
@@ -265,7 +265,7 @@ fn calc_entry_size_in_bytes(prop: &MapProperty) -> u32 {
 #[binrw]
 #[derive(Debug)]
 pub struct MapProperty {
-    #[bw(calc = calc_entry_size_in_bytes(&self))]
+    #[bw(calc = calc_entry_size_in_bytes(self))]
     pub size_in_bytes: u32,
 
     #[brw(pad_before = 4)]
@@ -287,7 +287,7 @@ pub struct MapProperty {
 
 impl crate::structs::PropertyBase for MapProperty {
     fn type_name() -> &'static str {
-        return "MapProperty";
+        "MapProperty"
     }
 
     fn size_in_bytes(&self) -> u32 {
@@ -296,7 +296,7 @@ impl crate::structs::PropertyBase for MapProperty {
             + crate::common::size_of_string_with_length(&self.value_name)
             + 5
             + 4
-            + calc_entry_size_in_bytes(&self)
+            + calc_entry_size_in_bytes(self)
     }
 }
 

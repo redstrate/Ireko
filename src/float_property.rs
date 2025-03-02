@@ -11,7 +11,7 @@ pub struct FloatProperty {
 
 impl crate::structs::PropertyBase for FloatProperty {
     fn type_name() -> &'static str {
-        return "FloatProperty";
+        "FloatProperty"
     }
 
     fn size_in_bytes(&self) -> u32 {

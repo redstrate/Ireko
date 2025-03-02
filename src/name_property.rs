@@ -16,7 +16,7 @@ pub struct NameProperty {
 
 impl crate::structs::PropertyBase for NameProperty {
     fn type_name() -> &'static str {
-        return "NameProperty";
+        "NameProperty"
     }
 
     fn size_in_bytes(&self) -> u32 {

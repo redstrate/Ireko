@@ -16,7 +16,7 @@ pub struct StrProperty {
 
 impl crate::structs::PropertyBase for StrProperty {
     fn type_name() -> &'static str {
-        return "StrProperty";
+        "StrProperty"
     }
 
     fn size_in_bytes(&self) -> u32 {

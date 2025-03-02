@@ -11,7 +11,6 @@ use crate::linear_color::LinearColorStruct;
 use crate::map_property::MapProperty;
 use crate::name_property::NameProperty;
 use crate::primary_asset_id::PrimaryAssetIdStruct;
-use crate::primary_asset_type::PrimaryAssetTypeStruct;
 use crate::str_property::StrProperty;
 use binrw::{BinRead, BinResult, BinWrite, binrw};
 use std::fmt::Debug;
@@ -359,11 +358,11 @@ pub(crate) trait PropertyBase {
 
 impl PropertyBase for DateTimeStruct {
     fn type_name() -> &'static str {
-        return "StructProperty";
+        "StructProperty"
     }
 
     fn struct_name() -> Option<&'static str> {
-        return Some("DateTime");
+        Some("DateTime")
     }
 
     fn size_in_bytes(&self) -> u32 {
@@ -373,11 +372,11 @@ impl PropertyBase for DateTimeStruct {
 
 impl PropertyBase for VectorStruct {
     fn type_name() -> &'static str {
-        return "StructProperty";
+        "StructProperty"
     }
 
     fn struct_name() -> Option<&'static str> {
-        return Some("Vector");
+        Some("Vector")
     }
 
     fn size_in_bytes(&self) -> u32 {
@@ -387,11 +386,11 @@ impl PropertyBase for VectorStruct {
 
 impl PropertyBase for QuatStruct {
     fn type_name() -> &'static str {
-        return "StructProperty";
+        "StructProperty"
     }
 
     fn struct_name() -> Option<&'static str> {
-        return Some("Quat");
+        Some("Quat")
     }
 
     fn size_in_bytes(&self) -> u32 {

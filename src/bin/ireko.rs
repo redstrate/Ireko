@@ -1,9 +1,7 @@
 use binrw::BinRead;
-use flate2::Decompress;
-use flate2::bufread::ZlibDecoder;
-use ireko::{CompressedSaveFile, TaggedSerialization};
+use ireko::CompressedSaveFile;
 use std::env;
-use std::io::{Cursor, Read};
+use std::io::Cursor;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();

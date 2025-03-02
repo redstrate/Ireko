@@ -1,6 +1,5 @@
 use crate::common::{read_string_with_length, write_string_with_length};
 use crate::map_property::{KeyType, MapSubStrProperty};
-use crate::struct_property::Struct;
 use crate::structs::GenericProperty;
 use binrw::{BinRead, BinResult, binrw};
 
@@ -77,7 +76,7 @@ pub struct SetProperty {
     #[brw(pad_before = 5)]
     pub key_type: KeyType,
 
-    #[br(parse_with = custom_parser, args(size_in_bytes, &key_name, &name))]
+    #[br(parse_with = custom_parser, args(size_in_bytes, &key_name, name))]
     pub entries: Vec<SetEntry>,
 }
 

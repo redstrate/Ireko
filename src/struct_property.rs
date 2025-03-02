@@ -62,7 +62,7 @@ pub enum Struct {
 
 pub(crate) fn calc_size_in_bytes(r#struct: &Struct) -> u32 {
     // todo
-    return match r#struct {
+    match r#struct {
         Struct::DateTime(date_time_struct) => date_time_struct.size_in_bytes(),
         Struct::DALoadOption(daload_option_struct) => daload_option_struct.size_in_bytes(),
         Struct::SaveSlotInfo(save_slot_info_struct) => save_slot_info_struct.size_in_bytes(),
@@ -98,7 +98,7 @@ pub(crate) fn calc_size_in_bytes(r#struct: &Struct) -> u32 {
         Struct::Transform(transform_struct) => transform_struct.size_in_bytes(),
         Struct::Quat(quat_struct) => quat_struct.size_in_bytes(),
         Struct::Vector(vector_struct) => vector_struct.size_in_bytes(),
-    };
+    }
 }
 
 #[binrw]

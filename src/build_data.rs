@@ -1,4 +1,3 @@
-use crate::common::{read_string_with_length, write_string_with_length};
 use crate::str_property::StrProperty;
 use crate::structs::PropertyBase;
 use crate::structs::{
@@ -29,8 +28,8 @@ pub struct DABuildDataStruct {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use binrw::{BinRead, BinWrite};
-    use std::{fs::write, io::Cursor};
+    use binrw::BinRead;
+    use std::io::Cursor;
 
     #[test]
     fn read_build_data() {

@@ -12,11 +12,11 @@ pub struct Guid {
 
 impl crate::structs::PropertyBase for Guid {
     fn type_name() -> &'static str {
-        return "StructProperty";
+        "StructProperty"
     }
 
     fn struct_name() -> Option<&'static str> {
-        return Some("Guid");
+        Some("Guid")
     }
 
     fn size_in_bytes(&self) -> u32 {

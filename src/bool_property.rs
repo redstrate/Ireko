@@ -12,7 +12,7 @@ pub struct BoolProperty {
 
 impl crate::structs::PropertyBase for BoolProperty {
     fn type_name() -> &'static str {
-        return "IntProperty";
+        "IntProperty"
     }
 
     fn size_in_bytes(&self) -> u32 {

@@ -17,7 +17,7 @@ pub struct EnumProperty {
 
 impl crate::structs::PropertyBase for EnumProperty {
     fn type_name() -> &'static str {
-        return "EnumProperty";
+        "EnumProperty"
     }
 
     fn size_in_bytes(&self) -> u32 {
@@ -30,7 +30,7 @@ impl crate::structs::PropertyBase for EnumProperty {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use binrw::{BinRead, BinWrite};
+    use binrw::BinRead;
     use std::io::Cursor;
 
     #[test]

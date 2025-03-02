@@ -21,7 +21,7 @@ fn calculate_header_size(key_name: &str, array_key_data: &ArrayKeyData) -> u64 {
 
 impl crate::structs::PropertyBase for ArrayProperty {
     fn type_name() -> &'static str {
-        return "ArrayProperty";
+        "ArrayProperty"
     }
 
     fn size_in_bytes(&self) -> u32 {
@@ -29,7 +29,7 @@ impl crate::structs::PropertyBase for ArrayProperty {
         4 + 8
             + crate::common::size_of_string_with_length(&self.key_name)
             + calc_key_data_size_in_bytes(&self.key_data)
-            + calc_size_in_bytes(&self)
+            + calc_size_in_bytes(self)
     }
 }
 
@@ -83,9 +83,7 @@ fn calc_size_in_bytes(prop: &ArrayProperty) -> u32 {
 
     for entry in &prop.entries {
         size += match &entry.key {
-            ArrayValue::Struct { r#struct } => {
-                crate::struct_property::calc_size_in_bytes(&r#struct)
-            }
+            ArrayValue::Struct { r#struct } => crate::struct_property::calc_size_in_bytes(r#struct),
             ArrayValue::String(string_map_key) => {
                 crate::common::size_of_string_with_length(&string_map_key.value)
             }
@@ -120,20 +118,20 @@ pub enum ArrayKeyData {
 }
 
 fn calc_key_data_size_in_bytes(key_data: &ArrayKeyData) -> u32 {
-    return match key_data {
+    match key_data {
         ArrayKeyData::String() => 0,
         ArrayKeyData::Struct {
             name,
             type_name,
             struct_name,
         } => {
-            crate::common::size_of_string_with_length(&name)
-                + crate::common::size_of_string_with_length(&type_name)
-                + crate::common::size_of_string_with_length(&struct_name)
+            crate::common::size_of_string_with_length(name)
+                + crate::common::size_of_string_with_length(type_name)
+                + crate::common::size_of_string_with_length(struct_name)
                 + 8
                 + 17
         }
-    };
+    }
 }
 
 #[binrw]
