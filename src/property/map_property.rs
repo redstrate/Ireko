@@ -2,7 +2,7 @@ use binrw::{BinRead, BinResult, binrw};
 
 use crate::{
     common::{read_bool_from, read_string_with_length, write_bool_as, write_string_with_length},
-    structure::{Struct, guid::Guid},
+    structure::{Guid, Struct},
 };
 
 use super::{GenericProperty, PropertyBase};

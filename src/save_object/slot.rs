@@ -1,9 +1,6 @@
 use crate::{
     property::{BoolProperty, FloatProperty, IntProperty, NameProperty, StrProperty},
-    structure::{
-        da_load_option::DALoadOptionStruct, datetime::DateTimeStruct,
-        save_slot_info::SaveSlotInfoStruct,
-    },
+    structure::{DALoadOptionStruct, DateTimeStruct, SaveSlotInfoStruct},
 };
 
 #[paramacro::serialized_struct("Transform")]

@@ -1,53 +1,73 @@
 use binrw::{BinRead, BinResult, BinWrite, binrw};
-use build_data::DABuildDataStruct;
-use da_assemble_id_data::DAAssembleIdDataStruct;
-use da_customize_asset_id::DACustomizeAssetIdDataStruct;
-use da_humanoid_coloring_data::DAHumanoidColoringDataStruct;
-use da_humanoid_figure_data::DAHumanoidFigureData;
-use da_load_option::DALoadOptionStruct;
-use da_machine_coloring_data::DAMachineColoringDataStruct;
-use da_module_color::DAModuleColorStruct;
-use da_module_item_data::DAModuleItemDataStruct;
-use da_trigger_data::DATriggerDataStruct;
-use da_tuning_data::DATuningDataStruct;
-use da_tuning_point_data::DATuningPointData;
-use datetime::DateTimeStruct;
-use guid::Guid;
-use linear_color::LinearColorStruct;
-use primary_asset_id::PrimaryAssetIdStruct;
-use primary_asset_type::PrimaryAssetTypeStruct;
-use quat::QuatStruct;
-use save_slot_info::SaveSlotInfoStruct;
 use std::fmt::Debug;
-use transform::TransformStruct;
-use vector::VectorStruct;
 
 use crate::{
     common::{read_string_with_length, write_string_with_length},
     property::PropertyBase,
 };
 
-pub mod build_data;
-pub mod da_assemble_id_data;
-pub mod da_customize_asset_id;
-pub mod da_humanoid_coloring_data;
-pub mod da_humanoid_figure_data;
-pub mod da_load_option;
-pub mod da_machine_coloring_data;
-pub mod da_module_color;
-pub mod da_module_item_data;
-pub mod da_trigger_data;
-pub mod da_tuning_data;
-pub mod da_tuning_point_data;
-pub mod datetime;
-pub mod guid;
-pub mod linear_color;
-pub mod primary_asset_id;
-pub mod primary_asset_type;
-pub mod quat;
-pub mod save_slot_info;
-pub mod transform;
-pub mod vector;
+mod build_data;
+pub use self::build_data::DABuildDataStruct;
+
+mod da_assemble_id_data;
+pub use self::da_assemble_id_data::DAAssembleIdDataStruct;
+
+mod da_customize_asset_id;
+pub use self::da_customize_asset_id::DACustomizeAssetIdDataStruct;
+
+mod da_humanoid_coloring_data;
+pub use self::da_humanoid_coloring_data::DAHumanoidColoringDataStruct;
+
+mod da_humanoid_figure_data;
+pub use self::da_humanoid_figure_data::DAHumanoidFigureData;
+
+mod da_load_option;
+pub use self::da_load_option::DALoadOptionStruct;
+
+mod da_machine_coloring_data;
+pub use self::da_machine_coloring_data::DAMachineColoringDataStruct;
+
+mod da_module_color;
+pub use self::da_module_color::DAModuleColorStruct;
+
+mod da_module_item_data;
+pub use self::da_module_item_data::DAModuleItemDataStruct;
+
+mod da_trigger_data;
+pub use self::da_trigger_data::DATriggerDataStruct;
+
+mod da_tuning_data;
+pub use self::da_tuning_data::DATuningDataStruct;
+
+mod da_tuning_point_data;
+pub use self::da_tuning_point_data::DATuningPointData;
+
+mod datetime;
+pub use self::datetime::DateTimeStruct;
+
+mod guid;
+pub use self::guid::Guid;
+
+mod linear_color;
+pub use self::linear_color::LinearColorStruct;
+
+mod primary_asset_id;
+pub use self::primary_asset_id::PrimaryAssetIdStruct;
+
+mod primary_asset_type;
+pub use self::primary_asset_type::PrimaryAssetTypeStruct;
+
+mod quat;
+pub use self::quat::QuatStruct;
+
+mod save_slot_info;
+pub use self::save_slot_info::SaveSlotInfoStruct;
+
+mod transform;
+pub use self::transform::TransformStruct;
+
+mod vector;
+pub use self::vector::VectorStruct;
 
 #[binrw]
 #[derive(Debug)]
@@ -140,7 +160,7 @@ pub(crate) fn calc_size_in_bytes(r#struct: &Struct) -> u32 {
 
 #[binrw]
 #[derive(Debug)]
-pub struct StructFieldPrelude {
+pub(crate) struct StructFieldPrelude {
     #[br(parse_with = read_string_with_length)]
     #[bw(write_with = write_string_with_length)]
     pub property_name: String,
@@ -152,7 +172,7 @@ pub struct StructFieldPrelude {
 
 #[binrw]
 #[derive(Debug)]
-pub struct StructPrelude {
+pub(crate) struct StructPrelude {
     pub size_in_bytes: u32,
     #[brw(pad_before = 4)]
     #[br(parse_with = read_string_with_length)]

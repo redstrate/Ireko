@@ -5,10 +5,7 @@ use crate::{
         BoolProperty, IntProperty, NameProperty, StrProperty, array_property::ArrayProperty,
         map_property::MapProperty, set_property::SetProperty,
     },
-    structure::{
-        build_data::DABuildDataStruct, da_tuning_point_data::DATuningPointData,
-        transform::TransformStruct,
-    },
+    structure::{DABuildDataStruct, DATuningPointData, TransformStruct},
 };
 
 #[paramacro::serialized_struct("Transform")]
