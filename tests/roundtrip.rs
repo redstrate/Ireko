@@ -1,5 +1,5 @@
 use binrw::{BinRead, BinWrite};
-use ireko::TaggedSerialization;
+use ireko::{GenericTaggedObject, TaggedSerialization};
 use std::fs::read;
 use std::io::Cursor;
 use std::path::PathBuf;
@@ -13,8 +13,8 @@ fn roundtrip_localprofile() {
     let mut data = read(d).unwrap();
     let mut cursor = Cursor::new(&mut data);
 
-    let local_profile = TaggedSerialization::read_le(&mut cursor).unwrap();
-    let tagged_object = &local_profile.objs[0];
+    let local_profile = TaggedSerialization::<GenericTaggedObject>::read_le(&mut cursor).unwrap();
+    let tagged_object = &local_profile.objs;
     assert_eq!(tagged_object.size_in_bytes, 339);
 
     tagged_object.entry("SavedDataVersion").unwrap();
@@ -41,8 +41,8 @@ fn roundtrip_slot() {
     let mut data = read(d).unwrap();
     let mut cursor = Cursor::new(&mut data);
 
-    let local_profile = TaggedSerialization::read_le(&mut cursor).unwrap();
-    let tagged_object = &local_profile.objs[0];
+    let local_profile = TaggedSerialization::<GenericTaggedObject>::read_le(&mut cursor).unwrap();
+    let tagged_object = &local_profile.objs;
     assert_eq!(tagged_object.size_in_bytes, 900);
 
     tagged_object.entry("PlayTime").unwrap();

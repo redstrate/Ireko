@@ -13,6 +13,9 @@ fn cc() -> BinResult<Vec<GenericProperty>> {
 
     loop {
         if let Ok(str) = GenericProperty::read_options(reader, endian, ()) {
+            if str.property_name == "None" {
+                break;
+            }
             result.push(str);
         } else {
             break;
@@ -47,6 +50,10 @@ pub struct StructMaybeKey {
     #[br(args { magic: &struct_name })]
     #[brw(pad_before = 17)]
     pub r#struct: Struct,
+
+    #[br(parse_with = cc)]
+    #[br(dbg)]
+    extra_fields: Vec<GenericProperty>,
 }
 
 #[binrw]

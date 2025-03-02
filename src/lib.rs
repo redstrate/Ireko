@@ -19,13 +19,16 @@ pub mod float_property;
 mod guid;
 pub mod int_property;
 mod linear_color;
+mod localprofile;
 pub mod map_property;
 mod name_property;
+mod persistent;
 mod primary_asset_id;
 mod primary_asset_type;
 mod quat;
 mod save_slot_info;
 pub mod set_property;
+mod slot;
 pub mod str_property;
 pub mod struct_property;
 mod structs;
@@ -71,10 +74,7 @@ pub enum Property {
     #[br(pre_assert("MapProperty" == magic))]
     Map(MapProperty),
     #[br(pre_assert("SetProperty" == magic))]
-    Set {
-        #[br(args(name))]
-        value: SetProperty,
-    },
+    Set(SetProperty),
 }
 
 #[binrw]
@@ -126,34 +126,24 @@ fn custom_tagged_object_writer(entries: &Vec<Entry>) -> BinResult<()> {
     Ok(())
 }
 
-#[binrw::parser(reader, endian)]
-fn custom_parser(size_in_bytes: u32) -> BinResult<Vec<TaggedObject>> {
-    let mut result = Vec::<TaggedObject>::new();
-
-    let mut current = reader.stream_position()?;
-    let end = current + size_in_bytes as u64;
-
-    while current < end {
-        let obj = TaggedObject::read_options(reader, endian, ())?;
-        if obj.size_in_bytes == 0 {
-            break;
-        }
-        result.push(obj);
-        current = reader.stream_position()?;
-    }
-    Ok(result)
-}
-
 #[binrw]
 #[derive(Debug)]
-pub struct TaggedObject {
+pub struct GenericTaggedObject {
     pub size_in_bytes: u32,
     #[br(parse_with = custom_tagged_object_parser, args(size_in_bytes))]
     #[bw(write_with = custom_tagged_object_writer)]
     pub entries: Vec<Entry>,
 }
 
-impl TaggedObject {
+#[binrw]
+#[derive(Debug)]
+pub struct PersistentObject {
+    pub size_in_bytes: u32,
+    #[br(pad_after = 4)]
+    pub profile: persistent::Persistent,
+}
+
+impl GenericTaggedObject {
     pub fn entry(&self, key: &str) -> Option<&Entry> {
         let entries: Vec<&Entry> = self.entries.iter().filter(|e| e.name == key).collect();
         entries.first().copied()
@@ -162,10 +152,13 @@ impl TaggedObject {
 
 #[binrw]
 #[derive(Debug)]
-pub struct TaggedSerialization {
+pub struct TaggedSerialization<T>
+where
+    for<'a> T: BinRead<Args<'a> = ()> + 'a,
+    for<'a> T: BinWrite<Args<'a> = ()> + 'a,
+{
     pub size_in_bytes: u32,
-    #[br(parse_with = custom_parser, args(size_in_bytes))]
-    pub objs: Vec<TaggedObject>,
+    pub objs: T,
 }
 
 #[binrw::parser(reader, endian)]
@@ -183,14 +176,18 @@ fn read_compressed_data(compressed_size: u64, uncompressed_size: u64) -> BinResu
 
 // TODO: there's no point in using a parser, we should just use map()
 #[binrw::parser(reader, endian)]
-fn read_tagged_data(data_blocks: &Vec<CompressedBlock>) -> BinResult<TaggedSerialization> {
+fn read_tagged_data<T>(data_blocks: &Vec<CompressedBlock>) -> BinResult<TaggedSerialization<T>>
+where
+    for<'a> T: BinRead<Args<'a> = ()> + 'a,
+    for<'a> T: BinWrite<Args<'a> = ()> + 'a,
+{
     let data_vecs: Vec<Vec<u8>> = data_blocks.iter().map(|x| x.data.clone()).collect();
     let combined_data = data_vecs.concat();
     write("output.bin", &combined_data);
 
     let mut cursor = Cursor::new(&combined_data);
 
-    TaggedSerialization::read_le(&mut cursor)
+    TaggedSerialization::<T>::read_le(&mut cursor)
 }
 
 #[binrw]
@@ -210,11 +207,15 @@ pub struct CompressedBlock {
 
 #[binrw]
 #[derive(Debug)]
-pub struct CompressedSaveFile {
+pub struct CompressedSaveFile<T>
+where
+    for<'a> T: BinRead<Args<'a> = ()> + 'a,
+    for<'a> T: BinWrite<Args<'a> = ()> + 'a,
+{
     #[br(parse_with = until_eof)]
     #[br(temp)]
     #[bw(ignore)]
     pub data: Vec<CompressedBlock>,
     #[br(parse_with = read_tagged_data, args(&data))]
-    pub value: TaggedSerialization,
+    pub value: TaggedSerialization<T>,
 }

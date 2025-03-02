@@ -10,6 +10,9 @@ fn cc() -> BinResult<Vec<GenericProperty>> {
 
     loop {
         if let Ok(str) = GenericProperty::read_options(reader, endian, ()) {
+            if str.property_name == "None" {
+                break;
+            }
             result.push(str);
         } else {
             break;
@@ -20,32 +23,36 @@ fn cc() -> BinResult<Vec<GenericProperty>> {
 
 #[binrw]
 #[derive(Debug)]
-#[br(import { magic: &str, name: &str })]
+#[br(import { magic: &str, key_type: &KeyType })]
 pub enum SetValue {
-    // NOTE: the name checking is just a temporary workaround
-    #[br(pre_assert("StructProperty" == magic && name != "OpenedStrongBoxIds" && name != "AcquiredItemBoxIds"))]
+    #[br(pre_assert("StructProperty" == magic && *key_type != KeyType::Unknown && *key_type != KeyType::EnumAgain))]
     Struct {
         #[br(parse_with = cc)]
         fields: Vec<GenericProperty>,
     },
     #[br(pre_assert("StringProperty" == magic || "NameProperty" == magic))]
     String(MapSubStrProperty),
-    #[br(pre_assert("StructProperty" == magic && name == "AcquiredItemBoxIds"))]
+    #[br(pre_assert("StructProperty" == magic && *key_type == KeyType::Unknown))]
     Unknown { unk: [u8; 736] },
-    #[br(pre_assert("StructProperty" == magic && name == "OpenedStrongBoxIds"))]
+    #[br(pre_assert("StructProperty" == magic && *key_type == KeyType::EnumAgain))]
     Unknown2 { unk: [u8; 64] },
 }
 
 #[binrw]
 #[derive(Debug)]
-#[br(import(value_type: &str, key_type: &str))]
+#[br(import(value_type: &str, key_type: &KeyType))]
 pub struct SetEntry {
-    #[br(args { magic: value_type, name: key_type })]
+    #[br(args { magic: value_type, key_type })]
+    #[br(dbg)]
     pub key: SetValue,
 }
 
 #[binrw::parser(reader, endian)]
-fn custom_parser(size_in_bytes: u32, value_type: &str, key_type: &str) -> BinResult<Vec<SetEntry>> {
+fn custom_parser(
+    size_in_bytes: u32,
+    value_type: &str,
+    key_type: &KeyType,
+) -> BinResult<Vec<SetEntry>> {
     let mut result = Vec::<SetEntry>::new();
 
     let mut current = reader.stream_position()?;
@@ -64,20 +71,32 @@ fn custom_parser(size_in_bytes: u32, value_type: &str, key_type: &str) -> BinRes
 
 #[binrw]
 #[derive(Debug)]
-#[br(import(name: &str))]
 pub struct SetProperty {
     pub size_in_bytes: u32,
 
     #[brw(pad_before = 4)]
     #[br(parse_with = read_string_with_length)]
     #[bw(write_with = write_string_with_length)]
+    #[br(dbg)]
     pub key_name: String,
 
     #[brw(pad_before = 5)]
+    #[br(dbg)]
     pub key_type: KeyType,
 
-    #[br(parse_with = custom_parser, args(size_in_bytes, &key_name, name))]
+    #[br(parse_with = custom_parser, args(size_in_bytes, &key_name, &key_type))]
     pub entries: Vec<SetEntry>,
+}
+
+impl crate::structs::PropertyBase for SetProperty {
+    fn type_name() -> &'static str {
+        "SetProperty"
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        // todo
+        0
+    }
 }
 
 #[cfg(test)]
