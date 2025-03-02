@@ -54,8 +54,8 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
     // Add "None" field
     let none_field_stream = quote! {
         #[br(temp)]
-        #[bw(calc = crate::structs::PrimaryAssetNameProperty { property_name: "None".to_string(), type_name: "".to_string(), key: None } )]
-        none_field: crate::structs::PrimaryAssetNameProperty
+        #[bw(calc = crate::structs::GenericProperty { property_name: "None".to_string(), type_name: "".to_string(), key: None } )]
+        none_field: crate::structs::GenericProperty
     };
     let buffer = ::syn::parse::Parser::parse2(
         syn::Field::parse_named,

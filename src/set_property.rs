@@ -1,16 +1,16 @@
 use crate::common::{read_string_with_length, write_string_with_length};
 use crate::map_property::{KeyType, MapSubStrProperty};
 use crate::struct_property::Struct;
-use crate::structs::PrimaryAssetNameProperty;
+use crate::structs::GenericProperty;
 use binrw::{BinRead, BinResult, binrw};
 
 // hack, we should be checking for "none" instead
 #[binrw::parser(reader, endian)]
-fn cc() -> BinResult<Vec<PrimaryAssetNameProperty>> {
-    let mut result = Vec::<PrimaryAssetNameProperty>::new();
+fn cc() -> BinResult<Vec<GenericProperty>> {
+    let mut result = Vec::<GenericProperty>::new();
 
     loop {
-        if let Ok(str) = PrimaryAssetNameProperty::read_options(reader, endian, ()) {
+        if let Ok(str) = GenericProperty::read_options(reader, endian, ()) {
             result.push(str);
         } else {
             break;
@@ -27,7 +27,7 @@ pub enum SetValue {
     #[br(pre_assert("StructProperty" == magic && name != "OpenedStrongBoxIds" && name != "AcquiredItemBoxIds"))]
     Struct {
         #[br(parse_with = cc)]
-        fields: Vec<PrimaryAssetNameProperty>,
+        fields: Vec<GenericProperty>,
     },
     #[br(pre_assert("StringProperty" == magic || "NameProperty" == magic))]
     String(MapSubStrProperty),

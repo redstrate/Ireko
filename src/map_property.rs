@@ -3,16 +3,16 @@ use crate::common::{
 };
 use crate::guid::Guid;
 use crate::struct_property::{Struct, calc_size_in_bytes};
-use crate::structs::{PrimaryAssetNameProperty, PropertyBase};
+use crate::structs::{GenericProperty, PropertyBase};
 use binrw::{BinRead, BinResult, binrw};
 
 // parse until we can't parse no more. kind of a hack for how we run into the end of Persistent.Sav
 #[binrw::parser(reader, endian)]
-fn cc() -> BinResult<Vec<PrimaryAssetNameProperty>> {
-    let mut result = Vec::<PrimaryAssetNameProperty>::new();
+fn cc() -> BinResult<Vec<GenericProperty>> {
+    let mut result = Vec::<GenericProperty>::new();
 
     loop {
-        if let Ok(str) = PrimaryAssetNameProperty::read_options(reader, endian, ()) {
+        if let Ok(str) = GenericProperty::read_options(reader, endian, ()) {
             result.push(str);
         } else {
             break;
@@ -25,7 +25,7 @@ fn cc() -> BinResult<Vec<PrimaryAssetNameProperty>> {
 #[derive(Debug)]
 pub struct MapSubStructProperty {
     #[br(parse_with = cc)]
-    fields: Vec<PrimaryAssetNameProperty>,
+    fields: Vec<GenericProperty>,
 }
 
 #[binrw]

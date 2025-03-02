@@ -45,10 +45,9 @@ pub struct SaveSlotInfoStruct {
     pub players: ArrayProperty,
 }
 
-// TODO: replace all usage of this with StructField
 #[binrw]
 #[derive(Debug)]
-pub struct PrimaryAssetNameProperty {
+pub struct GenericProperty {
     #[br(parse_with = read_string_with_length)]
     #[bw(write_with = write_string_with_length)]
     pub property_name: String,
