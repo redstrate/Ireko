@@ -1,6 +1,6 @@
 use crate::{
     bool_property::BoolProperty, da_load_option::DALoadOptionStruct, datetime::DateTimeStruct,
-    float_property::FloatProperty, int_property::IntProperty, map_property::MapProperty,
+    float_property::FloatProperty, int_property::IntProperty,
     name_property::NameProperty, save_slot_info::SaveSlotInfoStruct, str_property::StrProperty,
 };
 
