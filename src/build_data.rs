@@ -3,7 +3,6 @@ use crate::da_customize_asset_id::DACustomizeAssetIdDataStruct;
 use crate::da_trigger_data::DATriggerDataStruct;
 use crate::da_tuning_data::DATuningDataStruct;
 use crate::str_property::StrProperty;
-use crate::structs::PropertyBase;
 use std::fmt::Debug;
 
 #[paramacro::serialized_struct("DABuildData")]

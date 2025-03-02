@@ -93,14 +93,3 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
     output.into_token_stream().into()
 }
 
-/// Denotes a field with a known name.
-#[proc_macro_attribute]
-pub fn serialized_field(attr: TokenStream, input: TokenStream) -> TokenStream {
-    let input2 = parse_macro_input!(input as Item);
-
-    let output = quote! {
-        #input2
-    };
-
-    output.into_token_stream().into()
-}
