@@ -63,26 +63,6 @@ pub struct PrimaryAssetNameProperty {
     pub key: Option<Box<Property>>,
 }
 
-// TODO: allow specializing into structs for StructProperty, and so on
-#[binrw]
-#[derive(Debug)]
-#[br(import { name: &str, r#type: &str })]
-pub struct StructField {
-    #[br(parse_with = read_string_with_length)]
-    #[bw(write_with = write_string_with_length)]
-    #[br(assert(property_name == name))]
-    pub property_name: String,
-
-    #[br(parse_with = read_string_with_length)]
-    #[bw(write_with = write_string_with_length)]
-    #[br(assert(type_name == r#type))]
-    pub type_name: String,
-
-    #[br(if(property_name != "None"))]
-    #[br(args { magic: &type_name, name: &property_name })]
-    pub key: Option<Box<Property>>,
-}
-
 #[paramacro::serialized_struct("DAModuleItemData")]
 #[derive(Debug)]
 pub struct DAModuleItemDataStruct {

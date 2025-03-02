@@ -1,4 +1,4 @@
-use crate::{name_property::NameProperty, structs::StructField};
+use crate::name_property::NameProperty;
 use binrw::binrw;
 
 #[paramacro::serialized_struct("PrimaryAssetType")]
