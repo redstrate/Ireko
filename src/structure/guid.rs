@@ -3,12 +3,18 @@ use std::fmt;
 
 use crate::property::PropertyBase;
 
-// See https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Core/Misc/FGuid
+/// A globally unique identifier.
+///
+/// See [the Unreal Engine documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Core/Misc/FGuid?application_version=4.27).
 #[binrw]
 pub struct Guid {
+    /// Private.
     pub a: u32,
+    /// Holds the second component.
     pub b: u32,
+    /// Holds the third component.
     pub c: u32,
+    /// Holds the fourth component.
     pub d: u32,
 }
 
