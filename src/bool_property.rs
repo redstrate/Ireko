@@ -10,6 +10,16 @@ pub struct BoolProperty {
     pub value: bool,
 }
 
+impl crate::structs::PropertyBase for BoolProperty {
+    fn type_name() -> &'static str {
+        return "IntProperty";
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        10
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

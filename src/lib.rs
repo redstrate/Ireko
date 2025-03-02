@@ -2,6 +2,7 @@ pub mod array_property;
 pub mod bool_property;
 mod build_data;
 mod common;
+mod enum_property;
 pub mod float_property;
 mod guid;
 pub mod int_property;
@@ -14,7 +15,6 @@ pub mod set_property;
 pub mod str_property;
 pub mod struct_property;
 mod structs;
-mod enum_property;
 
 use binrw::helpers::until_eof;
 use std::fs::write;
@@ -30,7 +30,7 @@ use crate::name_property::NameProperty;
 use crate::set_property::SetProperty;
 use crate::str_property::StrProperty;
 use crate::struct_property::StructProperty;
-use binrw::{BinRead, BinResult, binrw, BinWrite};
+use binrw::{BinRead, BinResult, BinWrite, binrw};
 use flate2::bufread::ZlibDecoder;
 
 // Used in ArrayProperty exclusively, but could be used instead of magic above

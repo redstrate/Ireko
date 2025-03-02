@@ -9,6 +9,16 @@ pub struct IntProperty {
     pub value: u32,
 }
 
+impl crate::structs::PropertyBase for IntProperty {
+    fn type_name() -> &'static str {
+        return "IntProperty";
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        4 + 5 + 4
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

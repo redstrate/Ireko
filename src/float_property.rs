@@ -9,6 +9,16 @@ pub struct FloatProperty {
     pub value: f32,
 }
 
+impl crate::structs::PropertyBase for FloatProperty {
+    fn type_name() -> &'static str {
+        return "FloatProperty";
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        4 + 5 + 4
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

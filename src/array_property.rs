@@ -19,6 +19,20 @@ fn calculate_header_size(key_name: &str, array_key_data: &ArrayKeyData) -> u64 {
     }
 }
 
+impl crate::structs::PropertyBase for ArrayProperty {
+    fn type_name() -> &'static str {
+        return "ArrayProperty";
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        // todo
+        4 + 8
+            + crate::common::size_of_string_with_length(&self.key_name)
+            + calc_key_data_size_in_bytes(&self.key_data)
+            + calc_size_in_bytes(&self)
+    }
+}
+
 #[binrw::parser(reader, endian)]
 fn custom_parser(
     size_in_bytes: u32,
@@ -63,9 +77,22 @@ pub struct ArrayEntry {
     pub key: ArrayValue,
 }
 
-fn calc_size_in_bytes(entries: &Vec<ArrayEntry>) -> u32 {
-    // TODO: stub
-    18
+fn calc_size_in_bytes(prop: &ArrayProperty) -> u32 {
+    // TODO: complete guesswork still
+    let mut size = 4;
+
+    for entry in &prop.entries {
+        size += match &entry.key {
+            ArrayValue::Struct { r#struct } => {
+                crate::struct_property::calc_size_in_bytes(&r#struct)
+            }
+            ArrayValue::String(string_map_key) => {
+                crate::common::size_of_string_with_length(&string_map_key.value)
+            }
+        };
+    }
+
+    size
 }
 
 #[binrw]
@@ -86,16 +113,33 @@ pub enum ArrayKeyData {
 
         #[br(parse_with = read_string_with_length)]
         #[bw(write_with = write_string_with_length)]
-        #[br(pad_before = 8)] // idk
-        #[br(pad_after = 17)] // super idk
+        #[brw(pad_before = 8)] // idk
+        #[brw(pad_after = 17)] // super idk
         struct_name: String,
     },
+}
+
+fn calc_key_data_size_in_bytes(key_data: &ArrayKeyData) -> u32 {
+    return match key_data {
+        ArrayKeyData::String() => 0,
+        ArrayKeyData::Struct {
+            name,
+            type_name,
+            struct_name,
+        } => {
+            crate::common::size_of_string_with_length(&name)
+                + crate::common::size_of_string_with_length(&type_name)
+                + crate::common::size_of_string_with_length(&struct_name)
+                + 8
+                + 17
+        }
+    };
 }
 
 #[binrw]
 #[derive(Debug)]
 pub struct ArrayProperty {
-    #[bw(calc = calc_size_in_bytes(entries))]
+    #[bw(calc = calc_size_in_bytes(self))]
     pub size_in_bytes: u32,
 
     #[brw(pad_before = 4)]

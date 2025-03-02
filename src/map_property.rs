@@ -2,8 +2,8 @@ use crate::common::{
     read_bool_from, read_string_with_length, write_bool_as, write_string_with_length,
 };
 use crate::guid::Guid;
-use crate::struct_property::Struct;
-use crate::structs::PrimaryAssetNameProperty;
+use crate::struct_property::{Struct, calc_size_in_bytes};
+use crate::structs::{PrimaryAssetNameProperty, PropertyBase};
 use binrw::{BinRead, BinResult, binrw};
 
 // parse until we can't parse no more. kind of a hack for how we run into the end of Persistent.Sav
@@ -203,15 +203,69 @@ fn custom_parser(
     Ok(result)
 }
 
-fn calc_size_in_bytes(entries: &Vec<MapEntry>) -> u32 {
-    // TODO: stub
-    49
+fn calc_entry_size_in_bytes(prop: &MapProperty) -> u32 {
+    // TODO: complete guesswork still
+    let mut size = 4;
+
+    for entry in &prop.entries {
+        size += match &entry.key {
+            MapKeyProperty::String(string_map_key) => {
+                crate::common::size_of_string_with_length(&string_map_key.value)
+            }
+            MapKeyProperty::StructMaybe(struct_maybe_key) => {
+                crate::common::size_of_string_with_length(&struct_maybe_key.unk_name)
+                    + 8
+                    + crate::common::size_of_string_with_length(&struct_maybe_key.unk_type)
+                    + crate::common::size_of_string_with_length(&struct_maybe_key.struct_name)
+                    + 17
+                    + crate::struct_property::calc_size_in_bytes(&struct_maybe_key.r#struct)
+            }
+            MapKeyProperty::Enum(map_sub_enum_property) => {
+                crate::common::size_of_string_with_length(&map_sub_enum_property.value)
+            }
+            MapKeyProperty::EnumAgain(map_sub_enum_property) => {
+                crate::common::size_of_string_with_length(&map_sub_enum_property.value)
+            }
+            MapKeyProperty::GUID(guid) => guid.size_in_bytes(),
+            MapKeyProperty::SomeID(guid) => guid.size_in_bytes(),
+            MapKeyProperty::SomeID2(guid) => guid.size_in_bytes(),
+            MapKeyProperty::ArrayStruct(struct_maybe_key) => {
+                crate::common::size_of_string_with_length(&struct_maybe_key.unk_name)
+                    + 8
+                    + crate::common::size_of_string_with_length(&struct_maybe_key.unk_type)
+                    + crate::common::size_of_string_with_length(&struct_maybe_key.struct_name)
+                    + 17
+                    + crate::struct_property::calc_size_in_bytes(&struct_maybe_key.r#struct)
+            }
+            MapKeyProperty::SomeID3(guid) => guid.size_in_bytes(),
+            MapKeyProperty::SoftObjectProperty(string_map_key) => {
+                crate::common::size_of_string_with_length(&string_map_key.value)
+            }
+        };
+        size += match &entry.value {
+            MabSubProperty::Name(map_sub_name_property) => {
+                crate::common::size_of_string_with_length(&map_sub_name_property.value)
+            }
+            MabSubProperty::Struct(map_sub_struct_property) => 0,
+            MabSubProperty::Float(map_sub_float_property) => 4,
+            MabSubProperty::String(map_sub_str_property) => {
+                crate::common::size_of_string_with_length(&map_sub_str_property.value)
+            }
+            MabSubProperty::Bool(map_sub_bool_property) => 1,
+            MabSubProperty::Int(map_sub_int_property) => 4,
+            MabSubProperty::Enum(map_sub_enum_property) => {
+                crate::common::size_of_string_with_length(&map_sub_enum_property.value)
+            }
+        }
+    }
+
+    size
 }
 
 #[binrw]
 #[derive(Debug)]
 pub struct MapProperty {
-    #[bw(calc = calc_size_in_bytes(entries))]
+    #[bw(calc = calc_entry_size_in_bytes(&self))]
     pub size_in_bytes: u32,
 
     #[brw(pad_before = 4)]
@@ -229,6 +283,21 @@ pub struct MapProperty {
 
     #[br(parse_with = custom_parser, args(size_in_bytes, &map_key_type, &value_name))]
     pub entries: Vec<MapEntry>,
+}
+
+impl crate::structs::PropertyBase for MapProperty {
+    fn type_name() -> &'static str {
+        return "MapProperty";
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        4 + 4
+            + crate::common::size_of_string_with_length(&self.key_name)
+            + crate::common::size_of_string_with_length(&self.value_name)
+            + 5
+            + 4
+            + calc_entry_size_in_bytes(&self)
+    }
 }
 
 #[cfg(test)]

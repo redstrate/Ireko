@@ -3,6 +3,7 @@ use crate::array_property::ArrayProperty;
 use crate::bool_property::BoolProperty;
 use crate::build_data::DABuildDataStruct;
 use crate::common::{read_string_with_length, write_string_with_length};
+use crate::enum_property::EnumProperty;
 use crate::float_property::FloatProperty;
 use crate::guid::Guid;
 use crate::int_property::IntProperty;
@@ -12,9 +13,8 @@ use crate::name_property::NameProperty;
 use crate::primary_asset_id::PrimaryAssetIdStruct;
 use crate::primary_asset_type::PrimaryAssetTypeStruct;
 use crate::str_property::StrProperty;
-use binrw::{BinRead, BinResult, binrw};
+use binrw::{BinRead, BinResult, BinWrite, binrw};
 use std::fmt::Debug;
-use crate::enum_property::EnumProperty;
 
 #[binrw]
 #[derive(Debug)]
@@ -22,14 +22,14 @@ pub struct DateTimeStruct {
     pub unk: [u8; 8],
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DALoadOption")]
 #[derive(Debug)]
 pub struct DALoadOptionStruct {
     #[paramacro::serialized_field = "LoadTypes"]
     pub load_types: IntProperty,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("SaveSlotInfo")]
 #[derive(Debug)]
 pub struct SaveSlotInfoStruct {
     #[paramacro::serialized_field = "Name"]
@@ -83,14 +83,14 @@ pub struct StructField {
     pub key: Option<Box<Property>>,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DAModuleItemData")]
 #[derive(Debug)]
 pub struct DAModuleItemDataStruct {
     #[paramacro::serialized_field = "ModuleLevel"]
     pub module_level: IntProperty,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DAAssembleIdData")]
 #[derive(Debug)]
 pub struct DAAssembleIdDataStruct {
     #[paramacro::serialized_field = "Hanger"]
@@ -124,7 +124,7 @@ pub struct DAAssembleIdDataStruct {
     pub coloring_data: DAMachineColoringDataStruct,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DAMachineColoringData")]
 #[derive(Debug)]
 pub struct DAMachineColoringDataStruct {
     #[paramacro::serialized_field = "Hanger"]
@@ -155,7 +155,7 @@ pub struct DAMachineColoringDataStruct {
     pub right_rear_weapon: DAModuleColorStruct,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DAHumanoidColoringData")]
 #[derive(Debug)]
 pub struct DAHumanoidColoringDataStruct {
     #[paramacro::serialized_field = "Skin"]
@@ -192,7 +192,7 @@ pub struct DAHumanoidColoringDataStruct {
     pub body_sub3: LinearColorStruct,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DAModuleColor")]
 #[derive(Debug)]
 pub struct DAModuleColorStruct {
     #[paramacro::serialized_field = "Main"]
@@ -208,7 +208,7 @@ pub struct DAModuleColorStruct {
     pub glow: LinearColorStruct,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DATriggerData")]
 #[derive(Debug)]
 pub struct DATriggerDataStruct {
     #[paramacro::serialized_field = "A"]
@@ -221,7 +221,7 @@ pub struct DATriggerDataStruct {
     pub c: EnumProperty,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DACustomizeAssetIdData")]
 #[derive(Debug)]
 pub struct DACustomizeAssetIdDataStruct {
     #[paramacro::serialized_field = "Body"]
@@ -252,7 +252,7 @@ pub struct DACustomizeAssetIdDataStruct {
     pub inverse_back_hair_mesh: BoolProperty,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DAHumanoidFigureData")]
 #[derive(Debug)]
 pub struct DAHumanoidFigureData {
     #[paramacro::serialized_field = "BustUp"]
@@ -271,7 +271,7 @@ pub struct DAHumanoidFigureData {
     pub waist_up: FloatProperty,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DATuningData")]
 #[derive(Debug)]
 pub struct DATuningDataStruct {
     #[paramacro::serialized_field = "GrantedTuningPointList"]
@@ -284,7 +284,7 @@ pub struct SavedBuildData {
     pub build_data: DABuildDataStruct,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DATuningPointData")]
 #[derive(Debug)]
 pub struct DATuningPointData {
     #[paramacro::serialized_field = "TuningPoint"]
@@ -294,7 +294,7 @@ pub struct DATuningPointData {
     max_tuning_point: IntProperty,
 }
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("Transform")]
 #[derive(Debug)]
 pub struct TransformStruct {
     #[paramacro::serialized_field = "Rotation"]
@@ -340,11 +340,11 @@ pub struct StructFieldPrelude {
 #[binrw]
 #[derive(Debug)]
 pub struct StructPrelude {
-    pub unk: u32,
+    pub size_in_bytes: u32,
     #[brw(pad_before = 4)]
     #[br(parse_with = read_string_with_length)]
     #[bw(write_with = write_string_with_length)]
-    #[br(pad_after = 17)]
+    #[brw(pad_after = 17)]
     pub struct_name: String,
 }
 
@@ -359,10 +359,105 @@ pub(crate) fn read_struct_field<T: BinRead<Args<'static> = ()> + Debug>(
             name, prelude.property_name
         );
     }
-    println!("{:#?}", prelude);
+    // TODO: type check with type_name()
     if prelude.type_name == "StructProperty" {
-        println!("{:#?}", StructPrelude::read_le(reader)?);
+        StructPrelude::read_le(reader)?;
     }
     let val = T::read_options(reader, endian, ())?;
     Ok(val)
+}
+
+pub(crate) trait PropertyBase {
+    fn type_name() -> &'static str;
+    fn size_in_bytes(&self) -> u32;
+
+    // these are only relevant for structs:
+    // FIXME: this isn't great'
+    fn struct_name() -> Option<&'static str> {
+        None
+    }
+}
+
+impl PropertyBase for DateTimeStruct {
+    fn type_name() -> &'static str {
+        return "StructProperty";
+    }
+
+    fn struct_name() -> Option<&'static str> {
+        return Some("DateTime");
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        8
+    }
+}
+
+impl PropertyBase for VectorStruct {
+    fn type_name() -> &'static str {
+        return "StructProperty";
+    }
+
+    fn struct_name() -> Option<&'static str> {
+        return Some("Vector");
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        16
+    }
+}
+
+impl PropertyBase for QuatStruct {
+    fn type_name() -> &'static str {
+        return "StructProperty";
+    }
+
+    fn struct_name() -> Option<&'static str> {
+        return Some("Quat");
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        16
+    }
+}
+
+#[binrw::writer(writer, endian)]
+pub(crate) fn write_struct_field<T: PropertyBase + BinWrite<Args<'static> = ()> + Debug>(
+    structure: &T,
+    name: &str,
+) -> BinResult<()> {
+    let prelude = StructFieldPrelude {
+        property_name: name.to_string(),
+        type_name: T::type_name().to_string(),
+    };
+    prelude.write_le(writer)?;
+    if T::type_name() == "StructProperty" {
+        let struct_prelude = StructPrelude {
+            size_in_bytes: T::size_in_bytes(structure),
+            struct_name: T::struct_name().unwrap().to_string(),
+        };
+        struct_prelude.write_le(writer)?;
+    }
+    structure.write_options(writer, endian, ())?;
+    Ok(())
+}
+
+pub(crate) fn calc_struct_field_prelude_byte_size(
+    type_name: &str,
+    field_name: &str,
+    struct_name: Option<&str>,
+) -> u32 {
+    let mut base_size = crate::common::size_of_string_with_length(field_name);
+
+    // This is an easy way to detect properties that are actually structs
+    if struct_name.is_some() {
+        base_size += crate::common::size_of_string_with_length("StructProperty")
+            + crate::common::size_of_string_with_length(struct_name.unwrap())
+            + 4
+            + 17
+            + 4; // see struct prelude
+    } else {
+        base_size += crate::common::size_of_string_with_length(type_name);
+    }
+
+    base_size
 }

@@ -48,6 +48,10 @@ pub(crate) fn write_string_with_length(string: &String) -> BinResult<()> {
     Ok(())
 }
 
+pub(crate) fn size_of_string_with_length(string: &str) -> u32 {
+    4 + string.len() as u32 + 1
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

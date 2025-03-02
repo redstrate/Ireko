@@ -1,7 +1,23 @@
 use crate::common::{read_string_with_length, write_string_with_length};
 use crate::map_property::{KeyType, MapSubStrProperty};
 use crate::struct_property::Struct;
+use crate::structs::PrimaryAssetNameProperty;
 use binrw::{BinRead, BinResult, binrw};
+
+// hack, we should be checking for "none" instead
+#[binrw::parser(reader, endian)]
+fn cc() -> BinResult<Vec<PrimaryAssetNameProperty>> {
+    let mut result = Vec::<PrimaryAssetNameProperty>::new();
+
+    loop {
+        if let Ok(str) = PrimaryAssetNameProperty::read_options(reader, endian, ()) {
+            result.push(str);
+        } else {
+            break;
+        }
+    }
+    Ok(result)
+}
 
 #[binrw]
 #[derive(Debug)]
@@ -10,19 +26,8 @@ pub enum SetValue {
     // NOTE: the name checking is just a temporary workaround
     #[br(pre_assert("StructProperty" == magic && name != "OpenedStrongBoxIds" && name != "AcquiredItemBoxIds"))]
     Struct {
-        #[br(parse_with = read_string_with_length)]
-        #[bw(write_with = write_string_with_length)]
-        struct_type: String,
-        #[br(parse_with = read_string_with_length)]
-        #[bw(write_with = write_string_with_length)]
-        r#type: String,
-        #[br(parse_with = read_string_with_length)]
-        #[bw(write_with = write_string_with_length)]
-        #[br(pad_before = 8)]
-        struct_type_for_some_reason_again: String,
-        #[br(args { magic: &struct_type_for_some_reason_again })]
-        #[brw(pad_before = 17)]
-        r#struct: Struct,
+        #[br(parse_with = cc)]
+        fields: Vec<PrimaryAssetNameProperty>,
     },
     #[br(pre_assert("StringProperty" == magic || "NameProperty" == magic))]
     String(MapSubStrProperty),

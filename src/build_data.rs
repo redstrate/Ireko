@@ -1,12 +1,13 @@
 use crate::common::{read_string_with_length, write_string_with_length};
 use crate::str_property::StrProperty;
+use crate::structs::PropertyBase;
 use crate::structs::{
     DAAssembleIdDataStruct, DACustomizeAssetIdDataStruct, DATriggerDataStruct, DATuningDataStruct,
 };
-use binrw::{binrw};
+use binrw::binrw;
 use std::fmt::Debug;
 
-#[paramacro::serialized_struct]
+#[paramacro::serialized_struct("DABuildData")]
 #[derive(Debug)]
 pub struct DABuildDataStruct {
     #[paramacro::serialized_field = "Name"]
@@ -28,8 +29,8 @@ pub struct DABuildDataStruct {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use binrw::BinRead;
-    use std::io::Cursor;
+    use binrw::{BinRead, BinWrite};
+    use std::{fs::write, io::Cursor};
 
     #[test]
     fn read_build_data() {

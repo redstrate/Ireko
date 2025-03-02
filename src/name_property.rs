@@ -13,3 +13,13 @@ pub struct NameProperty {
     #[bw(write_with = write_string_with_length)]
     pub value: String,
 }
+
+impl crate::structs::PropertyBase for NameProperty {
+    fn type_name() -> &'static str {
+        return "NameProperty";
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        5 + 4 + crate::common::size_of_string_with_length(&self.value)
+    }
+}

@@ -12,8 +12,15 @@ use syn::{parse_macro_input, Expr, Fields, Item, Lit};
 pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
                   -> TokenStream {
     let mut input = syn::parse_macro_input!(input as syn::ItemStruct);
+    let Lit::Str(struct_name) = syn::parse_macro_input!(_metadata as syn::Lit) else {
+        panic!("This must be given a name!")
+    };
 
-    for mut field in &mut input.fields {
+    let mut field_types = vec![];
+    let mut field_idents = vec![];
+    let mut field_names = vec![];
+
+    for field in &mut input.fields {
         let our_custom = &field.attrs[0];
         let our_custom_name = our_custom.meta.require_name_value().unwrap();
         let our_custom_name = match &our_custom_name.value {
@@ -28,9 +35,13 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
             _ => None
         }.unwrap();
         field.attrs.clear();
+        field_types.push(field.ty.clone());
+        field_idents.push(field.ident.clone());
+        field_names.push(our_custom_name.clone());
         let field_tokens = field.to_token_stream();
         let new_field_token_stream = quote! {
             #[br(parse_with = crate::structs::read_struct_field, args(#our_custom_name))]
+            #[bw(write_with = crate::structs::write_struct_field, args(#our_custom_name))]
             #field_tokens
         };
         let buffer = ::syn::parse::Parser::parse2(
@@ -43,7 +54,7 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
     // Add "None" field
     let none_field_stream = quote! {
         #[br(temp)]
-        #[bw(ignore)]
+        #[bw(calc = crate::structs::PrimaryAssetNameProperty { property_name: "None".to_string(), type_name: "".to_string(), key: None } )]
         none_field: crate::structs::PrimaryAssetNameProperty
     };
     let buffer = ::syn::parse::Parser::parse2(
@@ -57,9 +68,26 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
         _ => {}
     }
 
+    let id = &input.ident;
+
     let output = quote! {
         #[binrw]
         #input
+
+        #[automatically_derived]
+        impl crate::structs::PropertyBase for #id {
+            fn type_name() -> &'static str {
+                return "StructProperty";
+            }
+
+            fn struct_name() -> Option<&'static str> {
+                return Some(#struct_name);
+            }
+
+            fn size_in_bytes(&self) -> u32 {
+                #( #field_types::size_in_bytes(&self.#field_idents) )+* + #( (crate::structs::calc_struct_field_prelude_byte_size(stringify!(#field_types), #field_names, #field_types::struct_name()) ) )+* + 9 // for "none" field
+            }
+        }
     };
 
     output.into_token_stream().into()

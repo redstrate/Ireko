@@ -14,6 +14,16 @@ pub struct StrProperty {
     pub value: String,
 }
 
+impl crate::structs::PropertyBase for StrProperty {
+    fn type_name() -> &'static str {
+        return "StrProperty";
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        5 + 4 + crate::common::size_of_string_with_length(&self.value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

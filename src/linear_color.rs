@@ -9,6 +9,20 @@ pub struct LinearColorStruct {
     pub a: f32,
 }
 
+impl crate::structs::PropertyBase for LinearColorStruct {
+    fn type_name() -> &'static str {
+        return "StructProperty";
+    }
+
+    fn struct_name() -> Option<&'static str> {
+        return Some("LinearColor");
+    }
+
+    fn size_in_bytes(&self) -> u32 {
+        16
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
