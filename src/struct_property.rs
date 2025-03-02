@@ -1,15 +1,26 @@
 use crate::build_data::DABuildDataStruct;
 use crate::common::{read_string_with_length, write_string_with_length};
+use crate::da_assemble_id_data::DAAssembleIdDataStruct;
+use crate::da_customize_asset_id::DACustomizeAssetIdDataStruct;
+use crate::da_humanoid_coloring_data::DAHumanoidColoringDataStruct;
+use crate::da_humanoid_figure_data::DAHumanoidFigureData;
+use crate::da_load_option::DALoadOptionStruct;
+use crate::da_machine_coloring_data::DAMachineColoringDataStruct;
+use crate::da_module_color::DAModuleColorStruct;
+use crate::da_module_item_data::DAModuleItemDataStruct;
+use crate::da_trigger_data::DATriggerDataStruct;
+use crate::da_tuning_data::DATuningDataStruct;
+use crate::da_tuning_point_data::DATuningPointData;
+use crate::datetime::DateTimeStruct;
 use crate::guid::Guid;
 use crate::linear_color::LinearColorStruct;
 use crate::primary_asset_id::PrimaryAssetIdStruct;
 use crate::primary_asset_type::PrimaryAssetTypeStruct;
-use crate::structs::{
-    DAAssembleIdDataStruct, DACustomizeAssetIdDataStruct, DAHumanoidColoringDataStruct,
-    DAHumanoidFigureData, DALoadOptionStruct, DAMachineColoringDataStruct, DAModuleColorStruct,
-    DAModuleItemDataStruct, DATriggerDataStruct, DATuningDataStruct, DATuningPointData,
-    DateTimeStruct, PropertyBase, QuatStruct, SaveSlotInfoStruct, TransformStruct, VectorStruct,
-};
+use crate::quat::QuatStruct;
+use crate::save_slot_info::SaveSlotInfoStruct;
+use crate::structs::PropertyBase;
+use crate::transform::TransformStruct;
+use crate::vector::VectorStruct;
 use binrw::binrw;
 
 #[binrw]

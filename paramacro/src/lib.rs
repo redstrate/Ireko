@@ -71,7 +71,7 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
     let id = &input.ident;
 
     let output = quote! {
-        #[binrw]
+        #[binrw::binrw]
         #input
 
         #[automatically_derived]
@@ -99,7 +99,6 @@ pub fn serialized_field(attr: TokenStream, input: TokenStream) -> TokenStream {
     let input2 = parse_macro_input!(input as Item);
 
     let output = quote! {
-        #[binrw]
         #input2
     };
 

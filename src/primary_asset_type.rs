@@ -1,5 +1,4 @@
 use crate::name_property::NameProperty;
-use binrw::binrw;
 
 #[paramacro::serialized_struct("PrimaryAssetType")]
 #[derive(Debug)]
