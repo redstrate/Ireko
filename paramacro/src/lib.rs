@@ -40,8 +40,8 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
         field_names.push(our_custom_name.clone());
         let field_tokens = field.to_token_stream();
         let new_field_token_stream = quote! {
-            #[br(parse_with = crate::structs::read_struct_field, args(#our_custom_name))]
-            #[bw(write_with = crate::structs::write_struct_field, args(#our_custom_name))]
+            #[br(parse_with = crate::structure::read_struct_field, args(#our_custom_name))]
+            #[bw(write_with = crate::structure::write_struct_field, args(#our_custom_name))]
             #field_tokens
         };
         let buffer = ::syn::parse::Parser::parse2(
@@ -54,8 +54,8 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
     // Add "None" field
     let none_field_stream = quote! {
         #[br(temp)]
-        #[bw(calc = crate::structs::GenericProperty { property_name: "None".to_string(), type_name: "".to_string(), key: None } )]
-        none_field: crate::structs::GenericProperty
+        #[bw(calc = crate::property::generic_property::GenericProperty { property_name: "None".to_string(), type_name: "".to_string(), key: None } )]
+        none_field: crate::property::generic_property::GenericProperty
     };
     let buffer = ::syn::parse::Parser::parse2(
         syn::Field::parse_named,
@@ -75,7 +75,7 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
         #input
 
         #[automatically_derived]
-        impl crate::structs::PropertyBase for #id {
+        impl crate::property::PropertyBase for #id {
             fn type_name() -> &'static str {
                 return "StructProperty";
             }
@@ -85,7 +85,7 @@ pub fn serialized_struct(_metadata: TokenStream, input: TokenStream)
             }
 
             fn size_in_bytes(&self) -> u32 {
-                #( #field_types::size_in_bytes(&self.#field_idents) )+* + #( (crate::structs::calc_struct_field_prelude_byte_size(stringify!(#field_types), #field_names, #field_types::struct_name()) ) )+* + 9 // for "none" field
+                #( #field_types::size_in_bytes(&self.#field_idents) )+* + #( (crate::structure::calc_struct_field_prelude_byte_size(stringify!(#field_types), #field_names, #field_types::struct_name()) ) )+* + 9 // for "none" field
             }
         }
     };

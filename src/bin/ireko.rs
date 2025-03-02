@@ -1,5 +1,6 @@
 use binrw::BinRead;
-use ireko::{CompressedSaveFile, GenericTaggedObject};
+use ireko::CompressedSaveFile;
+use ireko::save_object::generic::GenericTaggedObject;
 use std::env;
 use std::io::Cursor;
 

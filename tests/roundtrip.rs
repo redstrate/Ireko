@@ -1,5 +1,6 @@
 use binrw::{BinRead, BinWrite};
-use ireko::{GenericTaggedObject, TaggedSerialization};
+use ireko::TaggedSerialization;
+use ireko::save_object::generic::GenericTaggedObject;
 use std::fs::read;
 use std::io::Cursor;
 use std::path::PathBuf;
