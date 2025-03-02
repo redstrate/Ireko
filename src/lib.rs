@@ -1,6 +1,12 @@
 mod common;
+
+/// Properties
 pub mod property;
+
+/// Top-level save objects
 pub mod save_object;
+
+/// Various structures
 pub mod structure;
 
 use binrw::helpers::until_eof;

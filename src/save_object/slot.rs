@@ -3,9 +3,10 @@ use crate::{
     structure::{DALoadOptionStruct, DateTimeStruct, SaveSlotInfoStruct},
 };
 
-#[paramacro::serialized_struct("Transform")]
+/// The object stored in `Slot.sav`.
+#[paramacro::serialized_struct("")]
 #[derive(Debug)]
-pub struct Slot {
+pub struct SlotObject {
     #[paramacro::serialized_field = "SavedDataVersion"]
     version: IntProperty,
 

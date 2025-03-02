@@ -1,5 +1,3 @@
-use binrw::binrw;
-
 use crate::{
     property::{
         BoolProperty, IntProperty, NameProperty, StrProperty, array_property::ArrayProperty,
@@ -8,9 +6,10 @@ use crate::{
     structure::{DABuildDataStruct, DATuningPointData, TransformStruct},
 };
 
-#[paramacro::serialized_struct("Transform")]
+/// The object stored in `Persistent.sav`.
+#[paramacro::serialized_struct("")]
 #[derive(Debug)]
-pub struct Persistent {
+pub struct PersistentObject {
     #[paramacro::serialized_field = "SavedDataVersion"]
     version: IntProperty,
 
@@ -100,12 +99,4 @@ pub struct Persistent {
 
     #[paramacro::serialized_field = "bUseSaveSlot"]
     use_save_slot: BoolProperty,
-}
-
-#[binrw]
-#[derive(Debug)]
-pub struct PersistentObject {
-    pub size_in_bytes: u32,
-    #[br(pad_after = 4)]
-    pub profile: Persistent,
 }

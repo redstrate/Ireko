@@ -4,6 +4,8 @@ use binrw::binrw;
 use super::PropertyBase;
 
 /// A boolean.
+///
+/// See [the Unreal Engine documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/CoreUObject/UObject/UBoolProperty?application_version=4.27).
 #[binrw]
 #[derive(Debug)]
 pub struct BoolProperty {

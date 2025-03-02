@@ -1,8 +1,9 @@
 use crate::property::{BoolProperty, IntProperty, StrProperty, map_property::MapProperty};
 
-#[paramacro::serialized_struct("Transform")]
+/// The object stored in `LocalProfile.sav`.
+#[paramacro::serialized_struct("")]
 #[derive(Debug)]
-pub struct LocalProfile {
+pub struct LocalProfileObject {
     #[paramacro::serialized_field = "SavedDataVersion"]
     version: IntProperty,
 

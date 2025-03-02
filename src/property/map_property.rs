@@ -271,6 +271,8 @@ fn calc_entry_size_in_bytes(prop: &MapProperty) -> u32 {
 }
 
 /// A map.
+///
+/// See [the Unreal Engine documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/CoreUObject/UObject/UMapProperty?application_version=4.27).
 #[binrw]
 #[derive(Debug)]
 pub struct MapProperty {

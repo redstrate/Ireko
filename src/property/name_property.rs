@@ -4,6 +4,8 @@ use binrw::binrw;
 use super::PropertyBase;
 
 /// A name.
+///
+/// See [the Unreal Engine documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/CoreUObject/UObject/UNameProperty?application_version=4.27).
 #[binrw]
 #[derive(Debug)]
 pub struct NameProperty {

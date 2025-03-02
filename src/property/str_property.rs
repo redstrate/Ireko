@@ -4,6 +4,8 @@ use binrw::binrw;
 use super::PropertyBase;
 
 /// A string.
+///
+/// See [the Unreal Engine documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/CoreUObject/UObject/UStrProperty?application_version=4.27).
 #[binrw]
 #[derive(Debug)]
 pub struct StrProperty {

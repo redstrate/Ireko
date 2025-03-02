@@ -3,6 +3,8 @@ use binrw::binrw;
 use super::PropertyBase;
 
 /// A integer.
+///
+/// See [the Unreal Engine documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/CoreUObject/UObject/UIntProperty?application_version=4.27).
 #[binrw]
 #[derive(Debug)]
 pub struct IntProperty {
